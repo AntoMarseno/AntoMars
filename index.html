@@ -1297,20 +1297,16 @@ function _checkVelocita(nome) {
   return false;
 }
 
-// ── Start ──────────────────────────────────────────────────────────────
-// ── App start — richiede interazione utente per iOS autoplay ───────────
-function startApp() {
-  // Nascondi overlay tap
+// ── App start — dentro il modulo così ha accesso a init() ──────────────
+window.startApp = function() {
   document.getElementById('tap-overlay').classList.add('hidden');
-  // Forza play video
   const v = document.getElementById('astrid-video');
   if (v) v.play().catch(() => {});
-  // Mostra loading e avvia MediaPipe
   document.getElementById('loading').style.display = 'flex';
   init();
-}
+};
 
-// Forza play video al primo tocco/click — richiesto da alcuni browser
+// Forza play video al primo tocco/click
 document.addEventListener('click', () => {
   const v = document.getElementById('astrid-video');
   if (v && v.paused) v.play().catch(() => {});
