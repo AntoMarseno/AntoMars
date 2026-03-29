@@ -210,23 +210,24 @@
 
   <svg id="logo-anim" width="300" height="80" viewBox="0 0 300 80" style="position:relative;z-index:2;display:block;margin:0 auto">
     <rect id="bg-rect" x="150" y="40" width="0" height="0" rx="0" fill="#C4714A" opacity="0"/>
-    <g id="A1">
-      <path id="A1-path" d="M 10 66 L 28 18 L 46 66" stroke="#5C4A38" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-      <line id="A1-bar" x1="17" y1="46" x2="39" y2="46" stroke="#5C4A38" stroke-width="3" stroke-linecap="round"/>
-    </g>
+
+    <!-- A1: parte da sx del wordmark, arriva alla posizione icona -->
+    <path id="A1-path" d="M 10 66 L 28 18 L 46 66" stroke="#5C4A38" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <line id="A1-bar" x1="17" y1="46" x2="39" y2="46" stroke="#5C4A38" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- Lettere centrali -->
     <text id="tL"  x="52"  y="58" font-family="Georgia,serif" font-size="32" fill="#5C4A38">L</text>
     <text id="tL2" x="74"  y="58" font-family="Georgia,serif" font-size="32" fill="#5C4A38">L</text>
     <text id="tI"  x="96"  y="58" font-family="Georgia,serif" font-size="32" fill="#5C4A38">I</text>
     <text id="tN"  x="109" y="58" font-family="Georgia,serif" font-size="32" fill="#5C4A38">N</text>
     <text id="tE"  x="133" y="58" font-family="Georgia,serif" font-size="32" fill="#5C4A38">E</text>
-    <g id="A2">
-      <path id="A2-path" d="M 158 66 L 176 18 L 194 66" stroke="#C4714A" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-      <line id="A2-bar" x1="165" y1="46" x2="187" y2="46" stroke="#C4714A" stroke-width="3" stroke-linecap="round"/>
-    </g>
+
+    <!-- A2: parte da dx del wordmark -->
+    <path id="A2-path" d="M 194 66 L 176 18 L 158 66" stroke="#C4714A" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <line id="A2-bar" x1="187" y1="46" x2="165" y2="46" stroke="#C4714A" stroke-width="3" stroke-linecap="round"/>
   </svg>
 
   <div id="tap-slogan">Always aligned.</div>
-
   <button id="tap-btn" style="position:relative;z-index:3;padding:14px 36px;background:var(--accent2);color:#FFF8F0;border:none;border-radius:14px;font-family:'Jost',sans-serif;font-size:15px;font-weight:500;cursor:pointer;letter-spacing:0.05em;margin-top:4px">Inizia →</button>
 </div>
 
@@ -1393,6 +1394,17 @@ window.startApp = function() {
     function p(h,i){return parseInt(h.slice(i,i+2),16);}
     return 'rgb('+Math.round(p(h1,1)+(p(h2,1)-p(h1,1))*t)+','+Math.round(p(h1,3)+(p(h2,3)-p(h1,3))*t)+','+Math.round(p(h1,5)+(p(h2,5)-p(h1,5))*t)+')';
   }
+  function lerp(a,b,t){return a+(b-a)*t;}
+
+  // Stato iniziale A1: M 10 66 L 28 18 L 46 66, bar 17→39
+  // Stato finale A1:   M 122 66 L 138 16 L 154 66, bar 128→148
+  // Stato iniziale A2: M 194 66 L 176 18 L 158 66, bar 187→165
+  // Stato finale A2:   M 178 66 L 162 16 L 146 66, bar 172→152
+
+  const A1_start = {x1:10,x2:28,x3:46, bx1:17,bx2:39, y:66,yv:18};
+  const A1_end   = {x1:122,x2:138,x3:154, bx1:128,bx2:148, y:66,yv:16};
+  const A2_start = {x1:194,x2:176,x3:158, bx1:187,bx2:165, y:66,yv:18};
+  const A2_end   = {x1:178,x2:162,x3:146, bx1:172,bx2:152, y:66,yv:16};
 
   function frame(now){
     const raw = Math.min((now-t0)/dur, 1);
@@ -1404,13 +1416,22 @@ window.startApp = function() {
       if(el) el.setAttribute('opacity', String(1-t));
     });
 
-    // Fase 2 (0.20→0.62): A si avvicinano
+    // Fase 2 (0.20→0.62): A morphing verso stato finale icona
     const mT = ease(Math.max(0,Math.min(1,(raw-0.20)/0.42)));
-    const a1 = document.getElementById('A1');
-    const a2 = document.getElementById('A2');
-    if(a1) a1.setAttribute('transform', 'translate('+mT*122+',0)');
-    if(a2) a2.setAttribute('transform',
-      'translate('+(176-mT*26)+',0) scale(-1,1) translate(-176,0)');
+    const A1p = document.getElementById('A1-path');
+    const A1b = document.getElementById('A1-bar');
+    const A2p = document.getElementById('A2-path');
+    const A2b = document.getElementById('A2-bar');
+    if(A1p) A1p.setAttribute('d',
+      'M '+lerp(A1_start.x1,A1_end.x1,mT)+' '+lerp(A1_start.y,A1_end.y,mT)+
+      ' L '+lerp(A1_start.x2,A1_end.x2,mT)+' '+lerp(A1_start.yv,A1_end.yv,mT)+
+      ' L '+lerp(A1_start.x3,A1_end.x3,mT)+' '+lerp(A1_start.y,A1_end.y,mT));
+    if(A1b){A1b.setAttribute('x1',String(lerp(A1_start.bx1,A1_end.bx1,mT)));A1b.setAttribute('x2',String(lerp(A1_start.bx2,A1_end.bx2,mT)));}
+    if(A2p) A2p.setAttribute('d',
+      'M '+lerp(A2_start.x1,A2_end.x1,mT)+' '+lerp(A2_start.y,A2_end.y,mT)+
+      ' L '+lerp(A2_start.x2,A2_end.x2,mT)+' '+lerp(A2_start.yv,A2_end.yv,mT)+
+      ' L '+lerp(A2_start.x3,A2_end.x3,mT)+' '+lerp(A2_start.y,A2_end.y,mT));
+    if(A2b){A2b.setAttribute('x1',String(lerp(A2_start.bx1,A2_end.bx1,mT)));A2b.setAttribute('x2',String(lerp(A2_start.bx2,A2_end.bx2,mT)));}
 
     // Fase 3 (0.55→0.65): sfondo icona appare
     const bgT = ease(Math.max(0,Math.min(1,(raw-0.55)/0.10)));
@@ -1420,12 +1441,10 @@ window.startApp = function() {
 
     // Fase 4 (0.58→0.66): A diventano bianche
     const wT = ease(Math.max(0,Math.min(1,(raw-0.58)/0.08)));
-    const A1p=document.getElementById('A1-path'),A1b=document.getElementById('A1-bar');
-    const A2p=document.getElementById('A2-path'),A2b=document.getElementById('A2-bar');
     if(A1p) A1p.setAttribute('stroke',ic('#5C4A38','#ffffff',wT));
     if(A1b) A1b.setAttribute('stroke',ic('#5C4A38','#ffffff',wT));
-    if(A2p) A2p.setAttribute('stroke',ic('#C4714A','#ffffff',wT));
-    if(A2b) A2b.setAttribute('stroke',ic('#C4714A','#ffffff',wT));
+    if(A2p) A2p.setAttribute('stroke',ic('#C4714A','rgba(255,255,255,0.6)',wT));
+    if(A2b) A2b.setAttribute('stroke',ic('#C4714A','rgba(255,255,255,0.6)',wT));
 
     // PAUSA 0.65→0.82: icona visibile ~1.2 secondi
 
