@@ -208,31 +208,23 @@
 <div id="tap-overlay">
   <div id="tap-explosion"></div>
 
-  <!-- Logo: tutto costruito come path SVG per altezze coerenti -->
-  <svg id="logo-anim" width="200" height="68" viewBox="0 0 200 68" style="position:relative;z-index:2;display:block;margin:0 auto">
-    <rect id="bg-rect" x="100" y="34" width="0" height="0" rx="0" fill="#C4714A" opacity="0"/>
-
-    <!-- A1 sinistra: vertice=(20,6) base sx=(0,62) base dx=(40,62) -->
+  <svg id="logo-anim" width="300" height="80" viewBox="0 0 300 80" style="position:relative;z-index:2;display:block;margin:0 auto">
+    <rect id="bg-rect" x="150" y="40" width="0" height="0" rx="0" fill="#C4714A" opacity="0"/>
     <g id="A1">
-      <path id="A1-path" d="M 0 62 L 20 6 L 40 62" stroke="#5C4A38" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-      <line id="A1-bar" x1="7" y1="41" x2="33" y2="41" stroke="#5C4A38" stroke-width="3" stroke-linecap="round"/>
+      <path id="A1-path" d="M 10 66 L 28 18 L 46 66" stroke="#5C4A38" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <line id="A1-bar" x1="17" y1="46" x2="39" y2="46" stroke="#5C4A38" stroke-width="3" stroke-linecap="round"/>
     </g>
-
-    <!-- L L I N E -->
-    <text id="tL"  x="45"  y="56" font-family="Georgia,serif" font-size="28" fill="#5C4A38">L</text>
-    <text id="tL2" x="64"  y="56" font-family="Georgia,serif" font-size="28" fill="#5C4A38">L</text>
-    <text id="tI"  x="83"  y="56" font-family="Georgia,serif" font-size="28" fill="#5C4A38">I</text>
-    <text id="tN"  x="94"  y="56" font-family="Georgia,serif" font-size="28" fill="#5C4A38">N</text>
-    <text id="tE"  x="116" y="56" font-family="Georgia,serif" font-size="28" fill="#5C4A38">E</text>
-
-    <!-- A2 destra: IDENTICA ad A1 -->
+    <text id="tL"  x="52"  y="58" font-family="Georgia,serif" font-size="32" fill="#5C4A38">L</text>
+    <text id="tL2" x="74"  y="58" font-family="Georgia,serif" font-size="32" fill="#5C4A38">L</text>
+    <text id="tI"  x="96"  y="58" font-family="Georgia,serif" font-size="32" fill="#5C4A38">I</text>
+    <text id="tN"  x="109" y="58" font-family="Georgia,serif" font-size="32" fill="#5C4A38">N</text>
+    <text id="tE"  x="133" y="58" font-family="Georgia,serif" font-size="32" fill="#5C4A38">E</text>
     <g id="A2">
-      <path id="A2-path" d="M 140 62 L 160 6 L 180 62" stroke="#C4714A" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-      <line id="A2-bar" x1="147" y1="41" x2="173" y2="41" stroke="#C4714A" stroke-width="3" stroke-linecap="round"/>
+      <path id="A2-path" d="M 158 66 L 176 18 L 194 66" stroke="#C4714A" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <line id="A2-bar" x1="165" y1="46" x2="187" y2="46" stroke="#C4714A" stroke-width="3" stroke-linecap="round"/>
     </g>
   </svg>
 
-  <!-- Slogan animato -->
   <div id="tap-slogan">Always aligned.</div>
 
   <button id="tap-btn" style="position:relative;z-index:3;padding:14px 36px;background:var(--accent2);color:#FFF8F0;border:none;border-radius:14px;font-family:'Jost',sans-serif;font-size:15px;font-weight:500;cursor:pointer;letter-spacing:0.05em;margin-top:4px">Inizia →</button>
@@ -1416,13 +1408,13 @@ window.startApp = function() {
     const mT = ease(Math.max(0,Math.min(1,(raw-0.20)/0.42)));
     const a1 = document.getElementById('A1');
     const a2 = document.getElementById('A2');
-    if(a1) a1.setAttribute('transform', 'translate('+mT*80+',0)');
+    if(a1) a1.setAttribute('transform', 'translate('+mT*122+',0)');
     if(a2) a2.setAttribute('transform',
-      'translate('+(160-mT*60)+',0) scale(-1,1) translate(-160,0)');
+      'translate('+(176-mT*26)+',0) scale(-1,1) translate(-176,0)');
 
     // Fase 3 (0.55→0.65): sfondo icona appare
     const bgT = ease(Math.max(0,Math.min(1,(raw-0.55)/0.10)));
-    const sz = bgT*62, bx=100-sz/2, by=34-sz/2;
+    const sz = bgT*62, bx=150-sz/2, by=40-sz/2;
     const bg = document.getElementById('bg-rect');
     if(bg){bg.setAttribute('x',String(bx));bg.setAttribute('y',String(by));bg.setAttribute('width',String(sz));bg.setAttribute('height',String(sz));bg.setAttribute('rx',String(bgT*14));bg.setAttribute('opacity',String(bgT));}
 
