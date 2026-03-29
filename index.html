@@ -97,10 +97,13 @@
   .btn-back svg { width: 16px; height: 16px; }
 
   /* ── Tap to start overlay ── */
-  #tap-overlay { position: fixed; inset: 0; z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; background: var(--bg); cursor: pointer; transition: opacity 0.5s; }
+  #tap-overlay { position: fixed; inset: 0; z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; background: var(--bg); transition: opacity 0.4s; overflow: hidden; }
   #tap-overlay.hidden { opacity: 0; pointer-events: none; }
-  #tap-pulse { width: 72px; height: 72px; border-radius: 50%; background: rgba(196,113,74,0.12); border: 1.5px solid var(--terra); display: flex; align-items: center; justify-content: center; font-size: 28px; animation: pulse 1.8s ease-in-out infinite; }
-  @keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.08);opacity:0.8} }
+  #tap-explosion { position: absolute; width: 0; height: 0; border-radius: 50%; background: #C4714A; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: 1; pointer-events: none; }
+
+  /* ── App icon — small, top left in all screens ── */
+  .app-icon-small { position: absolute; top: 16px; left: 16px; z-index: 10; }
+  .app-icon-small svg { width: 36px; height: 36px; }
 
   /* ── Welcome ── */
   #screen-welcome { padding: 0; justify-content: flex-end; }
@@ -199,21 +202,26 @@
 <div class="orb orb1" style="position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;width:280px;height:280px;background:rgba(196,113,74,0.12);top:-80px;right:-60px"></div>
 <div class="orb orb2" style="position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;width:240px;height:240px;background:rgba(107,127,101,0.1);bottom:-70px;left:-50px"></div>
 
-<!-- Tap to start — richiesto da iOS per autoplay video -->
+<!-- Tap to start — animazione Netflix approvata -->
 <div id="tap-overlay">
-  <svg id="logo-anim" width="300" height="80" viewBox="0 0 300 80">
-    <rect id="bg-rect" x="150" y="40" width="0" height="0" rx="0" fill="#C4714A" opacity="0"/>
+  <div id="tap-explosion"></div>
+  <svg id="logo-anim" width="280" height="74" viewBox="0 0 280 74" style="position:relative;z-index:2">
+    <rect id="bg-rect" x="140" y="37" width="0" height="0" rx="0" fill="#C4714A" opacity="0"/>
     <g id="A1">
-      <path id="A1-path" d="M 10 66 L 28 18 L 46 66" stroke="#5C4A38" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-      <line id="A1-bar" x1="17" y1="46" x2="39" y2="46" stroke="#5C4A38" stroke-width="3" stroke-linecap="round"/>
+      <path id="A1-path" d="M 8 64 L 26 10 L 44 64" stroke="#5C4A38" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <line id="A1-bar" x1="15" y1="43" x2="37" y2="43" stroke="#5C4A38" stroke-width="3" stroke-linecap="round"/>
     </g>
-    <text id="middle-text" x="52" y="58" font-family="Georgia, serif" font-size="32" font-weight="400" letter-spacing="5" fill="#5C4A38" opacity="1">LLINE</text>
+    <text id="tL"  x="50"  y="54" font-family="Georgia,serif" font-size="30" fill="#5C4A38">L</text>
+    <text id="tL2" x="70"  y="54" font-family="Georgia,serif" font-size="30" fill="#5C4A38">L</text>
+    <text id="tI"  x="90"  y="54" font-family="Georgia,serif" font-size="30" fill="#5C4A38">I</text>
+    <text id="tN"  x="102" y="54" font-family="Georgia,serif" font-size="30" fill="#5C4A38">N</text>
+    <text id="tE"  x="124" y="54" font-family="Georgia,serif" font-size="30" fill="#5C4A38">E</text>
     <g id="A2">
-      <path id="A2-path" d="M 190 66 L 208 18 L 226 66" stroke="#C4714A" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-      <line id="A2-bar" x1="197" y1="46" x2="219" y2="46" stroke="#C4714A" stroke-width="3" stroke-linecap="round"/>
+      <path id="A2-path" d="M 152 64 L 170 10 L 188 64" stroke="#C4714A" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <line id="A2-bar" x1="159" y1="43" x2="181" y2="43" stroke="#C4714A" stroke-width="3" stroke-linecap="round"/>
     </g>
   </svg>
-  <p id="tap-hint" style="font-family:'Jost',sans-serif;font-size:12px;color:#9A8A78;letter-spacing:0.1em;text-transform:uppercase;margin-top:12px">Tocca per iniziare</p>
+  <button id="tap-btn" style="position:relative;z-index:3;padding:14px 36px;background:var(--accent2);color:#FFF8F0;border:none;border-radius:14px;font-family:'Jost',sans-serif;font-size:15px;font-weight:500;cursor:pointer;letter-spacing:0.05em">Inizia →</button>
 </div>
 
 <!-- Loading -->
@@ -229,6 +237,16 @@
 <!-- SCREEN 1: WELCOME -->
 <!-- ═══════════════════════════════════════ -->
 <div class="screen" id="screen-welcome">
+  <div class="app-icon-small">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="9" fill="#C4714A"/>
+      <path d="M 6 33 L 14 8 L 22 33" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="9" y1="23" x2="19" y2="23" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M 34 33 L 26 8 L 18 33" stroke="rgba(255,255,255,0.6)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="31" y1="23" x2="21" y2="23" stroke="rgba(255,255,255,0.6)" stroke-width="2.2" stroke-linecap="round"/>
+    </svg>
+  </div>
+
 
   <!-- Video Astrid — sfondo pieno -->
   <div id="astrid-video-wrap">
@@ -273,6 +291,16 @@
 <!-- SCREEN 2: LEVEL -->
 <!-- ═══════════════════════════════════════ -->
 <div class="screen" id="screen-level">
+  <div class="app-icon-small">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="9" fill="#C4714A"/>
+      <path d="M 6 33 L 14 8 L 22 33" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="9" y1="23" x2="19" y2="23" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M 34 33 L 26 8 L 18 33" stroke="rgba(255,255,255,0.6)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="31" y1="23" x2="21" y2="23" stroke="rgba(255,255,255,0.6)" stroke-width="2.2" stroke-linecap="round"/>
+    </svg>
+  </div>
+
   <button class="btn-back" onclick="goBack('screen-level')">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg>
     Indietro
@@ -316,6 +344,16 @@
 <!-- SCREEN 3: MODE -->
 <!-- ═══════════════════════════════════════ -->
 <div class="screen" id="screen-mode">
+  <div class="app-icon-small">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="9" fill="#C4714A"/>
+      <path d="M 6 33 L 14 8 L 22 33" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="9" y1="23" x2="19" y2="23" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M 34 33 L 26 8 L 18 33" stroke="rgba(255,255,255,0.6)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="31" y1="23" x2="21" y2="23" stroke="rgba(255,255,255,0.6)" stroke-width="2.2" stroke-linecap="round"/>
+    </svg>
+  </div>
+
   <button class="btn-back" onclick="goBack('screen-mode')">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg>
     Indietro
@@ -355,6 +393,16 @@
 <!-- SCREEN 4: POSE SELECT -->
 <!-- ═══════════════════════════════════════ -->
 <div class="screen" id="screen-poses">
+  <div class="app-icon-small">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="9" fill="#C4714A"/>
+      <path d="M 6 33 L 14 8 L 22 33" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="9" y1="23" x2="19" y2="23" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M 34 33 L 26 8 L 18 33" stroke="rgba(255,255,255,0.6)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="31" y1="23" x2="21" y2="23" stroke="rgba(255,255,255,0.6)" stroke-width="2.2" stroke-linecap="round"/>
+    </svg>
+  </div>
+
   <button class="btn-back" onclick="goBack('screen-poses')">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg>
     Indietro
@@ -383,6 +431,16 @@
 <!-- SCREEN 5: PREP -->
 <!-- ═══════════════════════════════════════ -->
 <div class="screen" id="screen-prep">
+  <div class="app-icon-small">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="9" fill="#C4714A"/>
+      <path d="M 6 33 L 14 8 L 22 33" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="9" y1="23" x2="19" y2="23" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M 34 33 L 26 8 L 18 33" stroke="rgba(255,255,255,0.6)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="31" y1="23" x2="21" y2="23" stroke="rgba(255,255,255,0.6)" stroke-width="2.2" stroke-linecap="round"/>
+    </svg>
+  </div>
+
   <button class="btn-back" onclick="goBack('screen-prep')">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg>
     Indietro
@@ -444,6 +502,16 @@
 <!-- SCREEN 7: SUMMARY -->
 <!-- ═══════════════════════════════════════ -->
 <div class="screen" id="screen-summary">
+  <div class="app-icon-small">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="9" fill="#C4714A"/>
+      <path d="M 6 33 L 14 8 L 22 33" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="9" y1="23" x2="19" y2="23" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M 34 33 L 26 8 L 18 33" stroke="rgba(255,255,255,0.6)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="31" y1="23" x2="21" y2="23" stroke="rgba(255,255,255,0.6)" stroke-width="2.2" stroke-linecap="round"/>
+    </svg>
+  </div>
+
   <div class="stack" style="max-width:400px;width:100%">
     <div style="text-align:center;margin-bottom:8px">
       <div class="logo" style="margin-bottom:12px">ALLIN<span style="color:var(--accent)">E</span>A</div>
@@ -1357,7 +1425,7 @@ function _checkVelocita(nome) {
   return false;
 }
 
-// ── App start — animazione Netflix approvata ───────────────────────────
+// ── App start — animazione approvata ──────────────────────────────────
 window.startApp = function() {
   if(window._animating) return;
   window._animating = true;
@@ -1365,75 +1433,72 @@ window.startApp = function() {
   const v = document.getElementById('astrid-video');
   if(v) v.play().catch(()=>{});
 
-  document.getElementById('tap-hint').style.opacity = '0';
-
-  // Aggiungi cerchio per esplosione finale
-  const circle = document.createElement('div');
-  circle.style.cssText = 'position:fixed;width:0;height:0;border-radius:50%;background:#C4714A;left:50%;top:50%;transform:translate(-50%,-50%);z-index:201;pointer-events:none;transition:none';
-  document.body.appendChild(circle);
-
-  const dur = 3200, t0 = performance.now();
+  const exp = document.getElementById('tap-explosion');
+  const dur = 7000, t0 = performance.now();
+  const lets = ['tL','tL2','tI','tN','tE'];
 
   function ease(t){return t<0.5?2*t*t:-1+(4-2*t)*t;}
   function ic(h1,h2,t){
-    const p=s=>parseInt(s,16);
-    return `rgb(${Math.round(p(h1.slice(1,3))+(p(h2.slice(1,3))-p(h1.slice(1,3)))*t)},${Math.round(p(h1.slice(3,5))+(p(h2.slice(3,5))-p(h1.slice(3,5)))*t)},${Math.round(p(h1.slice(5,7))+(p(h2.slice(5,7))-p(h1.slice(5,7)))*t)})`;
+    function p(h,i){return parseInt(h.slice(i,i+2),16);}
+    return 'rgb('+Math.round(p(h1,1)+(p(h2,1)-p(h1,1))*t)+','+Math.round(p(h1,3)+(p(h2,3)-p(h1,3))*t)+','+Math.round(p(h1,5)+(p(h2,5)-p(h1,5))*t)+')';
   }
 
   function frame(now){
     const raw = Math.min((now-t0)/dur, 1);
 
-    // Fase 1 (0→0.35): LLINE dissolve
-    const mid = document.getElementById('middle-text');
-    if(mid) mid.setAttribute('opacity', 1 - ease(Math.max(0,Math.min(1,raw/0.35))));
+    // Fase 1 (0→0.35): lettere dissolvono in sequenza
+    lets.forEach(function(id,i){
+      const t = ease(Math.max(0,Math.min(1,(raw-i*0.05)/0.25)));
+      const el = document.getElementById(id);
+      if(el) el.setAttribute('opacity', String(1-t));
+    });
 
-    // Fase 2 (0.2→0.82): A si avvicinano — geometria esatta v2
-    const move = ease(Math.max(0,Math.min(1,(raw-0.2)/0.62)));
+    // Fase 2 (0.20→0.62): A si avvicinano
+    const mT = ease(Math.max(0,Math.min(1,(raw-0.20)/0.42)));
     const a1 = document.getElementById('A1');
     const a2 = document.getElementById('A2');
-    if(a1) a1.setAttribute('transform', `translate(${move*110},0)`);
+    if(a1) a1.setAttribute('transform', 'translate('+mT*102+',0)');
     if(a2) a2.setAttribute('transform',
-      `translate(${208-move*110},0) scale(-1,1) translate(-208,0)`);
+      'translate('+(170-mT*18)+',0) scale(-1,1) translate(-170,0)');
 
-    // Fase 3 (0.55→0.78): sfondo icona quadrato arrotondato
-    const bgT = ease(Math.max(0,Math.min(1,(raw-0.55)/0.23)));
-    const sz = bgT*66, bx=150-sz/2, by=40-sz/2;
+    // Fase 3 (0.55→0.65): sfondo icona appare
+    const bgT = ease(Math.max(0,Math.min(1,(raw-0.55)/0.10)));
+    const sz = bgT*62, bx=140-sz/2, by=37-sz/2;
     const bg = document.getElementById('bg-rect');
-    if(bg){bg.setAttribute('x',bx);bg.setAttribute('y',by);bg.setAttribute('width',sz);bg.setAttribute('height',sz);bg.setAttribute('rx',bgT*15);bg.setAttribute('opacity',bgT);}
+    if(bg){bg.setAttribute('x',String(bx));bg.setAttribute('y',String(by));bg.setAttribute('width',String(sz));bg.setAttribute('height',String(sz));bg.setAttribute('rx',String(bgT*14));bg.setAttribute('opacity',String(bgT));}
 
-    // Fase 4 (0.62→0.82): A diventano bianche
-    const wT = ease(Math.max(0,Math.min(1,(raw-0.62)/0.20)));
-    const A1p=document.getElementById('A1-path'), A1b=document.getElementById('A1-bar');
-    const A2p=document.getElementById('A2-path'), A2b=document.getElementById('A2-bar');
+    // Fase 4 (0.58→0.66): A diventano bianche
+    const wT = ease(Math.max(0,Math.min(1,(raw-0.58)/0.08)));
+    const A1p=document.getElementById('A1-path'),A1b=document.getElementById('A1-bar');
+    const A2p=document.getElementById('A2-path'),A2b=document.getElementById('A2-bar');
     if(A1p) A1p.setAttribute('stroke',ic('#5C4A38','#ffffff',wT));
     if(A1b) A1b.setAttribute('stroke',ic('#5C4A38','#ffffff',wT));
-    if(A2p) A2p.setAttribute('stroke',ic('#C4714A','rgba(255,255,255,0.55)',wT));
-    if(A2b) A2b.setAttribute('stroke',ic('#C4714A','rgba(255,255,255,0.55)',wT));
+    if(A2p) A2p.setAttribute('stroke',ic('#C4714A','#ffffff',wT));
+    if(A2b) A2b.setAttribute('stroke',ic('#C4714A','#ffffff',wT));
 
-    // Fase 5 (0.80→1): cerchio esplode a schermo intero — Netflix
-    const cT = ease(Math.max(0,Math.min(1,(raw-0.80)/0.20)));
-    const rad = cT * Math.max(window.innerWidth, window.innerHeight) * 1.5;
-    circle.style.width = rad*2+'px';
-    circle.style.height = rad*2+'px';
+    // PAUSA 0.65→0.82: icona visibile ~1.2 secondi
+
+    // Fase 5 (0.82→1.0): esplosione lenta a schermo intero
+    const cT = ease(Math.max(0,Math.min(1,(raw-0.82)/0.18)));
+    const rad = cT * Math.max(window.innerWidth, window.innerHeight) * 1.6;
+    if(exp){ exp.style.width=rad*2+'px'; exp.style.height=rad*2+'px'; }
 
     if(raw < 1){
       requestAnimationFrame(frame);
     } else {
-      // Schermo tutto terracotta → carica app
       setTimeout(() => {
         const overlay = document.getElementById('tap-overlay');
         overlay.classList.add('hidden');
         document.getElementById('loading').style.display = 'flex';
+        window._animating = false;
         init();
-        // Fade out cerchio dopo caricamento
-        setTimeout(() => { circle.style.transition='opacity 0.5s'; circle.style.opacity='0'; setTimeout(()=>circle.remove(),500); }, 800);
-      }, 400);
+      }, 300);
     }
   }
   requestAnimationFrame(frame);
 };
 
-document.getElementById('tap-overlay').addEventListener('click', window.startApp, {once:true});
+document.getElementById('tap-btn').addEventListener('click', window.startApp, {once:true});
 
 document.addEventListener('click', () => {
   const v = document.getElementById('astrid-video');
