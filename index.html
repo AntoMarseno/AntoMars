@@ -100,6 +100,8 @@
   #tap-overlay { position: fixed; inset: 0; z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; background: var(--bg); transition: opacity 0.4s; overflow: hidden; text-align: center; }
   #tap-overlay.hidden { opacity: 0; pointer-events: none; }
   #tap-explosion { position: absolute; width: 0; height: 0; border-radius: 50%; background: #C4714A; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: 1; pointer-events: none; }
+  #tap-slogan { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 300; font-style: italic; color: var(--accent); letter-spacing: 0.12em; position: relative; z-index: 2; opacity: 0; animation: sloganIn 1.2s ease 0.6s forwards; }
+  @keyframes sloganIn { 0%{opacity:0;transform:translateY(8px)} 100%{opacity:1;transform:translateY(0)} }
 
   /* ── App icon — small, top left in all screens ── */
   .app-icon-small { position: absolute; top: 16px; left: 16px; z-index: 10; }
@@ -205,24 +207,35 @@
 <!-- Tap to start — animazione Netflix approvata -->
 <div id="tap-overlay">
   <div id="tap-explosion"></div>
-  <svg id="logo-anim" width="280" height="74" viewBox="0 0 280 74" style="position:relative;z-index:2">
-    <rect id="bg-rect" x="140" y="37" width="0" height="0" rx="0" fill="#C4714A" opacity="0"/>
+
+  <!-- Logo: tutto costruito come path SVG per altezze coerenti -->
+  <svg id="logo-anim" width="280" height="68" viewBox="0 0 280 68" style="position:relative;z-index:2;display:block;margin:0 auto">
+    <rect id="bg-rect" x="140" y="34" width="0" height="0" rx="0" fill="#C4714A" opacity="0"/>
+
+    <!-- A1 sinistra: vertice=(26,6) base sx=(6,62) base dx=(46,62) -->
     <g id="A1">
-      <path id="A1-path" d="M 8 64 L 26 10 L 44 64" stroke="#5C4A38" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-      <line id="A1-bar" x1="15" y1="43" x2="37" y2="43" stroke="#5C4A38" stroke-width="3" stroke-linecap="round"/>
+      <path id="A1-path" d="M 6 62 L 26 6 L 46 62" stroke="#5C4A38" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <line id="A1-bar" x1="13" y1="41" x2="39" y2="41" stroke="#5C4A38" stroke-width="3" stroke-linecap="round"/>
     </g>
-    <text id="tL"  x="50"  y="54" font-family="Georgia,serif" font-size="30" fill="#5C4A38">L</text>
-    <text id="tL2" x="70"  y="54" font-family="Georgia,serif" font-size="30" fill="#5C4A38">L</text>
-    <text id="tI"  x="90"  y="54" font-family="Georgia,serif" font-size="30" fill="#5C4A38">I</text>
-    <text id="tN"  x="102" y="54" font-family="Georgia,serif" font-size="30" fill="#5C4A38">N</text>
-    <text id="tE"  x="124" y="54" font-family="Georgia,serif" font-size="30" fill="#5C4A38">E</text>
+
+    <!-- L L I N E — ogni lettera come path per controllo totale -->
+    <text id="tL"  x="52"  y="56" font-family="Georgia,serif" font-size="28" fill="#5C4A38">L</text>
+    <text id="tL2" x="71"  y="56" font-family="Georgia,serif" font-size="28" fill="#5C4A38">L</text>
+    <text id="tI"  x="90"  y="56" font-family="Georgia,serif" font-size="28" fill="#5C4A38">I</text>
+    <text id="tN"  x="101" y="56" font-family="Georgia,serif" font-size="28" fill="#5C4A38">N</text>
+    <text id="tE"  x="123" y="56" font-family="Georgia,serif" font-size="28" fill="#5C4A38">E</text>
+
+    <!-- A2 destra: IDENTICA ad A1, stessa geometria, stessa altezza -->
     <g id="A2">
-      <path id="A2-path" d="M 152 64 L 170 10 L 188 64" stroke="#C4714A" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-      <line id="A2-bar" x1="159" y1="43" x2="181" y2="43" stroke="#C4714A" stroke-width="3" stroke-linecap="round"/>
+      <path id="A2-path" d="M 148 62 L 168 6 L 188 62" stroke="#C4714A" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <line id="A2-bar" x1="155" y1="41" x2="181" y2="41" stroke="#C4714A" stroke-width="3" stroke-linecap="round"/>
     </g>
   </svg>
-  <p style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;font-style:italic;color:var(--muted);letter-spacing:0.08em;position:relative;z-index:2">Always aligned.</p>
-  <button id="tap-btn" style="position:relative;z-index:3;padding:14px 36px;background:var(--accent2);color:#FFF8F0;border:none;border-radius:14px;font-family:'Jost',sans-serif;font-size:15px;font-weight:500;cursor:pointer;letter-spacing:0.05em">Inizia →</button>
+
+  <!-- Slogan animato -->
+  <div id="tap-slogan">Always aligned.</div>
+
+  <button id="tap-btn" style="position:relative;z-index:3;padding:14px 36px;background:var(--accent2);color:#FFF8F0;border:none;border-radius:14px;font-family:'Jost',sans-serif;font-size:15px;font-weight:500;cursor:pointer;letter-spacing:0.05em;margin-top:4px">Inizia →</button>
 </div>
 
 <!-- Loading -->
