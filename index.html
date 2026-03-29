@@ -201,8 +201,18 @@
 
 <!-- Tap to start — richiesto da iOS per autoplay video -->
 <div id="tap-overlay">
-  <div class="logo" style="font-size:26px;letter-spacing:0.2em">ALLIN<span style="color:var(--terra)">E</span>A</div>
-  <div id="tap-pulse">🧘</div>
+  <svg id="logo-tap" width="260" height="70" viewBox="0 0 260 70">
+    <rect id="bg-tap" x="130" y="35" width="0" height="0" rx="0" fill="#C4714A" opacity="0"/>
+    <g id="A1-tap">
+      <path id="A1p-tap" d="M 8 58 L 24 10 L 40 58" stroke="#5C4A38" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <line id="A1b-tap" x1="15" y1="39" x2="33" y2="39" stroke="#5C4A38" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    <text id="mid-tap" x="44" y="52" font-family="Georgia,serif" font-size="28" font-weight="400" letter-spacing="3" fill="#5C4A38" opacity="1">LLINE</text>
+    <g id="A2-tap">
+      <path id="A2p-tap" d="M 188 58 L 204 10 L 220 58" stroke="#C4714A" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <line id="A2b-tap" x1="195" y1="39" x2="213" y2="39" stroke="#C4714A" stroke-width="3" stroke-linecap="round"/>
+    </g>
+  </svg>
   <button onclick="window.startApp()" style="margin-top:8px;padding:16px 40px;background:var(--accent2);color:#FFF8F0;border:none;border-radius:14px;font-family:'Jost',sans-serif;font-size:16px;font-weight:500;cursor:pointer;letter-spacing:0.05em">Inizia →</button>
 </div>
 
@@ -229,7 +239,18 @@
 
   <!-- Logo in alto -->
   <div id="welcome-logo">
-    <div class="logo" style="font-size:24px;letter-spacing:0.2em;text-shadow:0 1px 8px rgba(247,243,238,0.8)">ALLIN<span style="color:var(--terra)">E</span>A</div>
+    <svg id="logo-welcome" width="220" height="60" viewBox="0 0 220 60">
+      <rect id="bg-w" x="110" y="30" width="0" height="0" rx="0" fill="#C4714A" opacity="0"/>
+      <g id="A1-w">
+        <path id="A1p-w" d="M 6 52 L 20 8 L 34 52" stroke="#5C4A38" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <line id="A1b-w" x1="12" y1="34" x2="28" y2="34" stroke="#5C4A38" stroke-width="2.5" stroke-linecap="round"/>
+      </g>
+      <text id="mid-w" x="37" y="46" font-family="Georgia,serif" font-size="24" letter-spacing="2" fill="#5C4A38" opacity="1">LLINE</text>
+      <g id="A2-w">
+        <path id="A2p-w" d="M 158 52 L 172 8 L 186 52" stroke="#C4714A" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <line id="A2b-w" x1="164" y1="34" x2="180" y2="34" stroke="#C4714A" stroke-width="2.5" stroke-linecap="round"/>
+      </g>
+    </svg>
   </div>
 
   <!-- Fumetto Astrid -->
@@ -665,10 +686,49 @@ window.onNomeInput = () => {
 window.goToLevel = () => {
   state.nome = document.getElementById('input-nome').value.trim();
   _nav.lastTime = Date.now(); _nav.screenCount = 1;
-  showScreen('screen-level');
-  speakAstrid(ASTRID.saluto(state.nome), { interrompi: true });
-  setTimeout(() => speakAstrid(ASTRID.livello.arrivo(state.nome)), 2200);
+
+  // Anima il logo prima di cambiare schermata
+  animateLogo(() => {
+    showScreen('screen-level');
+    speakAstrid(ASTRID.saluto(state.nome), { interrompi: true });
+    setTimeout(() => speakAstrid(ASTRID.livello.arrivo(state.nome)), 2200);
+  });
 };
+
+function animateLogo(onComplete) {
+  const dur = 1400, t0 = performance.now();
+  function ease(t){return t<0.5?2*t*t:-1+(4-2*t)*t;}
+  function icol(h1,h2,t){
+    const p=s=>parseInt(s,16);
+    const [r1,g1,b1]=[p(h1.slice(1,3)),p(h1.slice(3,5)),p(h1.slice(5,7))];
+    const [r2,g2,b2]=[p(h2.slice(1,3)),p(h2.slice(3,5)),p(h2.slice(5,7))];
+    return `rgb(${Math.round(r1+(r2-r1)*t)},${Math.round(g1+(g2-g1)*t)},${Math.round(b1+(b2-b1)*t)})`;
+  }
+  // A1 centro=20, A2 centro=172, centro SVG=110
+  // A1 → sposta +90, A2 → sposta -62 + specchia intorno a 172
+  function frame(now){
+    const raw=Math.min((now-t0)/dur,1);
+    const tT=ease(Math.max(0,Math.min(1,raw/0.35)));
+    const el=document.getElementById('mid-w');
+    if(el) el.setAttribute('opacity',1-tT);
+    const mT=ease(Math.max(0,Math.min(1,(raw-0.2)/0.65)));
+    const a1=document.getElementById('A1-w');
+    const a2=document.getElementById('A2-w');
+    if(a1) a1.setAttribute('transform',`translate(${mT*90},0)`);
+    if(a2) a2.setAttribute('transform',`translate(${172-mT*62},0) scale(-1,1) translate(-172,0)`);
+    const bT=ease(Math.max(0,Math.min(1,(raw-0.5)/0.5)));
+    const sz=bT*56, x=110-sz/2, y=30-sz/2;
+    const r=document.getElementById('bg-w');
+    if(r){r.setAttribute('x',x);r.setAttribute('y',y);r.setAttribute('width',sz);r.setAttribute('height',sz);r.setAttribute('rx',bT*13);r.setAttribute('opacity',bT);}
+    const c1=icol('#5C4A38','#FFFFFF',bT);
+    const c2=icol('#C4714A','#FFFFFF',bT);
+    ['A1p-w','A1b-w'].forEach(id=>{const e=document.getElementById(id);if(e)e.setAttribute('stroke',c1);});
+    ['A2p-w','A2b-w'].forEach(id=>{const e=document.getElementById(id);if(e)e.setAttribute('stroke',c2);});
+    if(raw<1){requestAnimationFrame(frame);}
+    else{ setTimeout(onComplete, 200); }
+  }
+  requestAnimationFrame(frame);
+}
 
 // ── Level screen ───────────────────────────────────────────────────────
 window.selectLevel = (livello) => {
