@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ALLINEA</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #F7F3EE;
+    --bg2:     #EFE9E0;
+    --surface: #FFFCF8;
+    --surface2:#F2EDE4;
+    --border:  rgba(160,140,115,0.18);
+    --border2: rgba(160,140,115,0.32);
+    --accent:  #7A6652;
+    --accent2: #5C4A38;
+    --sage:    #6B7F65;
+    --sage2:   #4E6048;
+    --terra:   #C4714A;
+    --terra2:  #A05535;
+    --green:   #5A8A5E;
+    --orange:  #C08040;
+    --red:     #B85040;
+    --text:    #2E2318;
+    --muted:   #9A8A78;
+    --warm:    #D4A574;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'Jost', sans-serif; }
+
+  /* ── Organic background ── */
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 60% 50% at 85% 10%, rgba(196,113,74,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 60% at 10% 85%, rgba(107,127,101,0.1) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 50% 50%, rgba(212,165,116,0.05) 0%, transparent 70%);
+  }
+
+  /* ── Screens ── */
+  .screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px 24px; opacity: 0; pointer-events: none; transition: opacity 0.45s ease; z-index: 1; }
+  .screen.active { opacity: 1; pointer-events: all; }
+
+  /* ── Typography ── */
+  .display { font-family: 'Cormorant Garamond', serif; font-size: clamp(42px, 11vw, 62px); font-weight: 300; line-height: 1.05; letter-spacing: -0.01em; }
+  .display em { font-style: italic; color: var(--terra); }
+  h2 { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 400; letter-spacing: 0.01em; color: var(--text); }
+  h3 { font-size: 15px; font-weight: 500; color: var(--text); }
+  p { font-size: 15px; color: var(--muted); line-height: 1.65; font-weight: 300; }
+  .label { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+
+  /* ── Logo ── */
+  .logo { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; letter-spacing: 0.18em; color: var(--accent2); }
+  .logo span { color: var(--terra); }
+
+  /* ── Decorative divider ── */
+  .deco-line { display: flex; align-items: center; gap: 10px; margin: 6px 0; }
+  .deco-line::before, .deco-line::after { content: ''; flex: 1; height: 1px; background: var(--border2); }
+  .deco-line span { font-size: 12px; color: var(--warm); }
+
+  /* ── Cards ── */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 20px; width: 100%; }
+  .card.interactive { cursor: pointer; transition: all 0.2s; }
+  .card.interactive:active { transform: scale(0.975); background: var(--surface2); }
+  .card.selected { border-color: var(--terra); background: rgba(196,113,74,0.05); }
+
+  /* ── Buttons ── */
+  .btn-primary { width: 100%; padding: 17px; background: var(--accent2); color: #FFF8F0; border: none; border-radius: 14px; font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.2s; letter-spacing: 0.05em; }
+  .btn-primary:active { transform: scale(0.975); background: var(--terra2); }
+  .btn-primary:disabled { background: var(--surface2); color: var(--muted); }
+  .btn-ghost { width: 100%; padding: 15px; background: transparent; color: var(--muted); border: 1px solid var(--border2); border-radius: 14px; font-family: 'Jost', sans-serif; font-size: 14px; font-weight: 400; cursor: pointer; transition: all 0.2s; }
+  .btn-ghost:active { background: var(--surface2); }
+
+  /* ── Input ── */
+  .input-wrap { position: relative; width: 100%; }
+  .input-wrap input { width: 100%; padding: 16px 18px; background: var(--surface); border: 1px solid var(--border2); border-radius: 14px; color: var(--text); font-family: 'Jost', sans-serif; font-size: 17px; font-weight: 400; outline: none; transition: border-color 0.2s; -webkit-appearance: none; }
+  .input-wrap input:focus { border-color: var(--terra); }
+  .input-wrap input::placeholder { color: var(--muted); font-weight: 300; }
+
+  /* ── Badge ── */
+  .badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; letter-spacing: 0.03em; }
+  .badge-accent { background: rgba(122,102,82,0.1); color: var(--accent); }
+  .badge-green  { background: rgba(90,138,94,0.12); color: var(--green); }
+  .badge-orange { background: rgba(192,128,64,0.12); color: var(--orange); }
+  .badge-red    { background: rgba(184,80,64,0.1);  color: var(--red); }
+
+  /* ── Stack / layout ── */
+  .stack { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+  .row { display: flex; align-items: center; gap: 12px; }
+  .spacer { flex: 1; }
+  .level-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── Back button ── */
+  .btn-back { position: absolute; top: 18px; left: 20px; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--muted); font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 400; padding: 4px 0; z-index: 10; }
+  .btn-back:active { color: var(--accent2); }
+  .btn-back svg { width: 16px; height: 16px; }
+
+  /* ── Welcome ── */
+  #screen-welcome { padding: 0; justify-content: flex-end; }
+  #astrid-video-wrap { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #astrid-video { width: 100%; height: 100%; object-fit: cover; }
+  /* Gradient overlay — parte bassa leggibile */
+  #astrid-video-wrap::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(247,243,238,0.15) 0%, rgba(247,243,238,0.0) 35%, rgba(247,243,238,0.85) 70%, rgba(247,243,238,0.98) 100%); pointer-events: none; }
+  /* Fumetto Astrid animato */
+  #astrid-fumetto { position: absolute; top: 52%; left: 50%; transform: translateX(-50%); width: calc(100% - 48px); max-width: 360px; background: rgba(255,252,248,0.95); border: 1px solid var(--border2); border-radius: 18px; padding: 14px 18px; font-size: 15px; color: var(--text); line-height: 1.55; font-weight: 300; opacity: 0; animation: fumettoIn 0.6s ease 0.8s forwards; }
+  #astrid-fumetto::before { content: '✦ Astrid'; font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--terra); display: block; margin-bottom: 5px; }
+  @keyframes fumettoIn { from{opacity:0;transform:translateX(-50%) translateY(12px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+  /* Logo in alto */
+  #welcome-logo { position: absolute; top: 52px; left: 50%; transform: translateX(-50%); z-index: 2; }
+  /* Form in basso */
+  #welcome-form { position: relative; z-index: 2; width: 100%; padding: 0 24px 44px; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+  /* ── Level ── */
+  #screen-level { justify-content: flex-start; padding-top: 64px; }
+  .level-card .level-info { flex: 1; }
+  .level-card .level-name { font-size: 15px; font-weight: 500; margin-bottom: 3px; }
+  .level-card .level-desc { font-size: 12px; color: var(--muted); font-weight: 300; }
+  .recommended-badge { font-size: 9px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sage); background: rgba(107,127,101,0.12); padding: 3px 8px; border-radius: 8px; }
+
+  /* ── Mode ── */
+  #screen-mode { justify-content: flex-start; padding-top: 64px; }
+  .mode-icon { width: 46px; height: 46px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+
+  /* ── Pose select ── */
+  #screen-poses { justify-content: flex-start; padding-top: 64px; }
+  .pose-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; width: 100%; }
+  .pose-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s; }
+  .pose-card:active { transform: scale(0.95); background: var(--surface2); }
+  .pose-card .pose-emoji { font-size: 30px; }
+  .pose-card .pose-name { font-size: 11px; font-weight: 500; text-align: center; color: var(--text); letter-spacing: 0.02em; }
+
+  /* ── Prep ── */
+  #screen-prep { justify-content: space-between; padding-top: 64px; padding-bottom: 44px; }
+  .prep-pose-visual { width: 156px; height: 156px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; font-size: 72px; margin: 0 auto; animation: float 3s ease-in-out infinite; }
+  .astrid-bubble { background: var(--surface); border: 1px solid var(--border2); border-radius: 16px; padding: 14px 16px; font-size: 14px; color: var(--text); line-height: 1.6; position: relative; font-weight: 300; }
+  .astrid-bubble::before { content: '✦ Astrid'; font-size: 9px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--terra); display: block; margin-bottom: 6px; }
+
+  /* ── Session ── */
+  #screen-session { padding: 0; justify-content: flex-start; }
+  #video-container { position: relative; width: 100%; height: 100%; }
+  #webcam { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  #pose-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  .session-panel { position: absolute; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background: rgba(247,243,238,0.88); border: 1px solid rgba(160,140,115,0.25); border-radius: 14px; }
+  #panel-top { top: 14px; left: 14px; right: 14px; padding: 10px 13px; }
+  #panel-bottom { bottom: 14px; left: 14px; right: 14px; padding: 10px 13px; }
+
+  .panel-pose-name { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 400; color: var(--text); }
+
+  /* Obiettivo pose — pallini colorati + nome articolazione */
+  .obj-row { display: flex; align-items: center; gap: 7px; }
+  .obj-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; transition: background 0.3s; }
+  .obj-name { font-size: 12px; color: var(--muted); font-weight: 400; }
+
+  /* Suggerimento Astrid — una riga sola */
+  #tip-text { font-size: 13px; color: var(--text); font-weight: 300; font-style: italic; }
+  #tip-text::before { content: '✦ '; color: var(--terra); font-style: normal; }
+
+  /* Timer pill */
+  .timer-bar-bg { width: 100%; height: 4px; background: var(--border2); border-radius: 2px; overflow: hidden; margin-top: 6px; }
+  .timer-bar-fill { height: 100%; border-radius: 2px; background: var(--sage); transition: width 0.5s linear; }
+  #timer-countdown { font-size: 13px; font-weight: 500; color: var(--sage2); }
+
+  #btn-exit-session { position: absolute; top: 14px; right: 14px; width: 30px; height: 30px; border-radius: 50%; background: rgba(247,243,238,0.85); border: 1px solid var(--border2); color: var(--accent); font-size: 13px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
+  #btn-flip-camera { position: absolute; top: 52px; right: 14px; width: 30px; height: 30px; border-radius: 50%; background: rgba(247,243,238,0.85); border: 1px solid var(--border2); color: var(--accent); font-size: 15px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
+
+  /* ── Summary ── */
+  #screen-summary { justify-content: flex-start; padding-top: 50px; overflow-y: auto; }
+  .score-number { font-family: 'Cormorant Garamond', serif; font-size: 52px; font-weight: 300; letter-spacing: -0.02em; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px; }
+  .stat-val { font-size: 22px; font-weight: 500; margin-bottom: 3px; }
+  .stat-lbl { font-size: 11px; color: var(--muted); font-weight: 300; letter-spacing: 0.04em; }
+  .pose-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pose-chip { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 6px 12px; font-size: 13px; font-weight: 300; }
+
+  /* ── Loading ── */
+  #loading { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; z-index: 100; transition: opacity 0.5s; }
+  #loading.hidden { opacity: 0; pointer-events: none; }
+  .loading-spinner { width: 36px; height: 36px; border: 1.5px solid var(--border2); border-top-color: var(--terra); border-radius: 50%; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Misc ── */
+  .divider { width: 100%; height: 1px; background: var(--border); margin: 4px 0; }
+  .seq-preview { display: flex; align-items: center; gap: 8px; margin: 10px 0; }
+</style>
+</head>
+<body>
+
+<!-- Background orbs -->
+<div class="orb orb1" style="position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;width:280px;height:280px;background:rgba(196,113,74,0.12);top:-80px;right:-60px"></div>
+<div class="orb orb2" style="position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;width:240px;height:240px;background:rgba(107,127,101,0.1);bottom:-70px;left:-50px"></div>
+
+<!-- Loading -->
+<div id="loading">
+  <div class="logo">ALLIN<span>E</span>A</div>
+  <div class="loading-spinner"></div>
+  <p style="font-size:13px">Caricamento MediaPipe...</p>
+</div>
+
+<!-- API key screen rimossa — voce gestita da Web Speech API -->
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SCREEN 1: WELCOME -->
+<!-- ═══════════════════════════════════════ -->
+<div class="screen" id="screen-welcome">
+
+  <!-- Video Astrid — sfondo pieno -->
+  <div id="astrid-video-wrap">
+    <video id="astrid-video" autoplay loop muted playsinline preload="auto">
+      <source src="astrid-welcome.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- Logo in alto -->
+  <div id="welcome-logo">
+    <div class="logo" style="font-size:24px;letter-spacing:0.2em;text-shadow:0 1px 8px rgba(247,243,238,0.8)">ALLIN<span style="color:var(--terra)">E</span>A</div>
+  </div>
+
+  <!-- Fumetto Astrid -->
+  <div id="astrid-fumetto" id="astrid-fumetto-text">
+    Ciao! Sono Astrid, la tua coach di yoga. Dimmi come ti chiami per iniziare!
+  </div>
+
+  <!-- Form nome + CTA -->
+  <div id="welcome-form" class="stack">
+    <div class="label" style="margin-bottom:2px">Il tuo nome</div>
+    <div class="input-wrap">
+      <input type="text" id="input-nome" placeholder="Come ti chiami?" maxlength="20" autocomplete="off" oninput="onNomeInput()">
+    </div>
+    <button class="btn-primary" id="btn-start" onclick="goToLevel()" disabled>Inizia con Astrid →</button>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SCREEN 2: LEVEL -->
+<!-- ═══════════════════════════════════════ -->
+<div class="screen" id="screen-level">
+  <button class="btn-back" onclick="goBack('screen-level')">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg>
+    Indietro
+  </button>
+  <div class="stack" style="max-width:400px;width:100%">
+    <div style="margin-bottom:8px">
+      <div class="label" style="margin-bottom:6px">Passo 1 di 2</div>
+      <h2>Qual è il tuo livello?</h2>
+    </div>
+
+    <div class="card interactive level-card row" id="card-principiante" onclick="selectLevel('Principiante')">
+      <div class="level-dot" style="background:#5A8A5E"></div>
+      <div class="level-info">
+        <div class="level-name">Principiante</div>
+        <div class="level-desc">Tolleranza +20° · Ideale per iniziare</div>
+      </div>
+    </div>
+
+    <div class="card interactive level-card row" id="card-intermedio" onclick="selectLevel('Intermedio')">
+      <div class="level-dot" style="background:#C4714A"></div>
+      <div class="level-info">
+        <div class="level-name">Intermedio</div>
+        <div class="level-desc">Tolleranza +8° · Pratica regolare</div>
+      </div>
+      <span class="recommended-badge">Consigliato</span>
+    </div>
+
+    <div class="card interactive level-card row" id="card-master" onclick="selectLevel('Master')">
+      <div class="level-dot" style="background:#B85040"></div>
+      <div class="level-info">
+        <div class="level-name">Master</div>
+        <div class="level-desc">Tolleranza ±0° · Solo esperti</div>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="btn-level-next" onclick="goToMode()" disabled style="margin-top:8px">Continua →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SCREEN 3: MODE -->
+<!-- ═══════════════════════════════════════ -->
+<div class="screen" id="screen-mode">
+  <button class="btn-back" onclick="goBack('screen-mode')">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg>
+    Indietro
+  </button>
+  <div class="stack" style="max-width:400px;width:100%">
+    <div style="margin-bottom:8px">
+      <div class="label" style="margin-bottom:6px">Passo 2 di 2</div>
+      <h2>Come vuoi allenarti?</h2>
+    </div>
+
+    <div class="card interactive row" onclick="startGuided()" style="padding:20px">
+      <div class="mode-icon" style="background:rgba(122,102,82,0.1)">🧘</div>
+      <div>
+        <h3>Allenamento Guidato</h3>
+        <p style="font-size:13px;margin-top:3px">Astrid ti guida in una sequenza di 3 pose</p>
+        <div class="seq-preview" style="margin-top:12px;justify-content:flex-start">
+          <span style="font-size:20px">🌳</span>
+          <span style="color:var(--muted);font-size:12px">→</span>
+          <span style="font-size:20px">⚔️</span>
+          <span style="color:var(--muted);font-size:12px">→</span>
+          <span style="font-size:20px">🐕</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card interactive row" onclick="goToPoses()" style="padding:20px">
+      <div class="mode-icon" style="background:rgba(107,127,101,0.1)">🎯</div>
+      <div>
+        <h3>Sessione Libera</h3>
+        <p style="font-size:13px;margin-top:3px">Scegli tu la posa e il tuo ritmo</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SCREEN 4: POSE SELECT -->
+<!-- ═══════════════════════════════════════ -->
+<div class="screen" id="screen-poses">
+  <button class="btn-back" onclick="goBack('screen-poses')">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg>
+    Indietro
+  </button>
+  <div class="stack" style="max-width:400px;width:100%">
+    <h2 style="margin-bottom:4px">Scegli una posa</h2>
+    <p style="margin-bottom:12px">Con quale iniziamo oggi?</p>
+    <div class="pose-grid">
+      <div class="pose-card" onclick="selectPose('Warrior I')">
+        <div class="pose-emoji">⚔️</div>
+        <div class="pose-name">Warrior I</div>
+      </div>
+      <div class="pose-card" onclick="selectPose('Downward Dog')">
+        <div class="pose-emoji">🐕</div>
+        <div class="pose-name">Downward Dog</div>
+      </div>
+      <div class="pose-card" onclick="selectPose('Tree Pose')">
+        <div class="pose-emoji">🌳</div>
+        <div class="pose-name">Tree Pose</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SCREEN 5: PREP -->
+<!-- ═══════════════════════════════════════ -->
+<div class="screen" id="screen-prep">
+  <button class="btn-back" onclick="goBack('screen-prep')">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg>
+    Indietro
+  </button>
+  <div class="stack" style="max-width:400px;width:100%;height:100%;justify-content:space-between;padding:20px 0">
+    <div>
+      <div class="label" style="margin-bottom:8px" id="prep-seq-label"></div>
+      <h2 id="prep-pose-name" style="margin-bottom:16px"></h2>
+      <div class="prep-pose-visual" id="prep-pose-emoji"></div>
+    </div>
+    <div class="astrid-bubble" id="prep-desc"></div>
+    <button class="btn-primary" id="btn-prep-start" onclick="startSession()">
+      Sono pronto →
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SCREEN 6: SESSION -->
+<!-- ═══════════════════════════════════════ -->
+<div class="screen" id="screen-session">
+  <div id="video-container">
+    <video id="webcam" autoplay playsinline muted></video>
+    <canvas id="pose-canvas"></canvas>
+
+    <!-- Top: solo nome posa + exit -->
+    <div class="session-panel" id="panel-top">
+      <div class="row">
+        <div class="panel-pose-name" id="session-pose-name"></div>
+        <div class="spacer"></div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span class="badge badge-accent" id="session-user-badge"></span>
+          <span class="badge" id="session-level-badge"></span>
+          <button id="btn-exit-session" onclick="exitSession()">✕</button>
+        </div>
+      </div>
+    </div>
+    <button id="btn-flip-camera" onclick="flipCamera()" title="Cambia camera">⇄</button>
+
+    <!-- Bottom: obiettivi + suggerimento + timer -->
+    <div class="session-panel" id="panel-bottom">
+      <!-- Pallini obiettivo articolazioni -->
+      <div id="obj-rows" class="row" style="gap:12px;flex-wrap:wrap;margin-bottom:8px"></div>
+      <div class="divider"></div>
+      <!-- Suggerimento Astrid -->
+      <div id="tip-text" style="margin:7px 0">Mettiti in posizione</div>
+      <!-- Timer bar (visibile solo quando postura ok) -->
+      <div id="timer-wrap" style="display:none">
+        <div class="row" style="margin-top:6px">
+          <div class="timer-bar-bg" style="flex:1"><div class="timer-bar-fill" id="timer-bar" style="width:0%"></div></div>
+          <div id="timer-countdown" style="margin-left:8px">20s</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SCREEN 7: SUMMARY -->
+<!-- ═══════════════════════════════════════ -->
+<div class="screen" id="screen-summary">
+  <div class="stack" style="max-width:400px;width:100%">
+    <div style="text-align:center;margin-bottom:8px">
+      <div class="logo" style="margin-bottom:12px">ALLIN<span style="color:var(--accent)">E</span>A</div>
+      <h2 id="summary-title">Sessione completata!</h2>
+      <p id="summary-sub" style="margin-top:4px"></p>
+    </div>
+
+    <!-- Score ring -->
+    <div class="score-ring-wrap">
+      <div style="position:relative;width:120px;height:120px;display:flex;align-items:center;justify-content:center">
+        <svg class="score-ring-svg" width="120" height="120" viewBox="0 0 120 120" style="position:absolute;top:0;left:0">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="8"/>
+          <circle id="score-ring-circle" cx="60" cy="60" r="50" fill="none" stroke-width="8" stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="314"/>
+        </svg>
+        <div style="text-align:center;position:relative">
+          <div class="score-number" id="summary-score">0</div>
+          <div class="label" style="margin-top:-4px">score</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Astrid comment -->
+    <div class="astrid-bubble" id="summary-astrid-msg"></div>
+
+    <!-- Stats grid -->
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-val" id="stat-pose">0/0</div>
+        <div class="stat-lbl">Pose completate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-acc" style="color:var(--green)">0%</div>
+        <div class="stat-lbl">Accuratezza</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-dur">0:00</div>
+        <div class="stat-lbl">Durata</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-level" style="color:var(--accent)">—</div>
+        <div class="stat-lbl">Livello</div>
+      </div>
+    </div>
+
+    <!-- Poses completed -->
+    <div>
+      <div class="label" style="margin-bottom:8px">Pose eseguite</div>
+      <div class="pose-chips" id="summary-pose-chips"></div>
+    </div>
+
+    <!-- Suggestion -->
+    <div id="summary-suggestion" style="display:none" class="card" style="border-color:rgba(251,191,36,0.2)">
+      <div style="font-size:12px;font-weight:700;color:var(--orange);margin-bottom:4px">💡 PROSSIMA SESSIONE</div>
+      <div id="summary-suggestion-text" style="font-size:14px"></div>
+    </div>
+
+    <button class="btn-primary" onclick="restartApp()">Nuova sessione →</button>
+    <div style="height:20px"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SCRIPTS -->
+<!-- ═══════════════════════════════════════ -->
+<script type="module">
+import { PoseLandmarker, FilesetResolver, DrawingUtils } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/vision_bundle.mjs";
+
+// ── State ──────────────────────────────────────────────────────────────
+const state = {
+  nome: '',
+  livello: null,
+  modalita: null,
+  posaCorrente: null,
+  seqIdx: 0,
+  wsVoice: null, // voce Web Speech API selezionata
+
+  // Session
+  timerInizio: null,
+  posaNota: false,
+  tCoach: 0,
+  tPosiz: 0,
+  corpoVisible: false,
+  sessionStats: { poseCompletate: [], angoliOk: 0, angoliTot: 0, tInizio: null },
+
+  // UI
+  lastBubbleMsg: '',
+  bubbleTimeout: null,
+};
+
+const SEQUENZA_GUIDATA = ['Tree Pose', 'Warrior I', 'Downward Dog'];
+const POSE_EMOJI = { 'Warrior I': '⚔️', 'Downward Dog': '🐕', 'Tree Pose': '🌳' };
+
+const LIVELLI = {
+  'Principiante': { tolExtra: 20 },
+  'Intermedio':   { tolExtra: 8  },
+  'Master':       { tolExtra: 0  },
+};
+
+const POSE_BASE = {
+  'Warrior I': {
+    desc: 'Gamba destra a 90°, gamba sinistra tesa, braccia in alto verso il soffitto.',
+    controlli: [
+      { nome: 'Ginocchio dx',  punti: ['right_hip','right_knee','right_ankle'],      target: 90,  tol: 15 },
+      { nome: 'Ginocchio sin', punti: ['left_hip','left_knee','left_ankle'],          target: 170, tol: 15 },
+      { nome: 'Spalla dx',     punti: ['right_elbow','right_shoulder','right_hip'],   target: 170, tol: 20 },
+    ],
+  },
+  'Downward Dog': {
+    desc: 'Mani e piedi a terra, fianchi verso il soffitto. Corpo a forma di V rovesciata.',
+    controlli: [
+      { nome: 'Anca dx',    punti: ['right_shoulder','right_hip','right_knee'],       target: 120, tol: 20 },
+      { nome: 'Gomito dx',  punti: ['right_shoulder','right_elbow','right_wrist'],    target: 170, tol: 15 },
+      { nome: 'Ginocchio dx', punti: ['right_hip','right_knee','right_ankle'],        target: 170, tol: 15 },
+    ],
+  },
+  'Tree Pose': {
+    desc: 'Stai in equilibrio sulla gamba destra. Piega la sinistra verso l\'esterno. Schiena dritta.',
+    controlli: [
+      { nome: 'Ginocchio sin', punti: ['left_hip','left_knee','left_ankle'],          target: 50,  tol: 20 },
+      { nome: 'Ginocchio dx',  punti: ['right_hip','right_knee','right_ankle'],       target: 170, tol: 15 },
+      { nome: 'Schiena',       punti: ['right_hip','right_shoulder','right_ear'],     target: 170, tol: 20 },
+    ],
+  },
+};
+
+const COACHING = {
+  'Warrior I': {
+    'Ginocchio dx':  { low: 'Piega di più il ginocchio destro a novanta gradi', high: 'Raddrizza il ginocchio destro' },
+    'Ginocchio sin': { low: 'Tendi la gamba sinistra', high: 'Abbassa la gamba sinistra' },
+    'Spalla dx':     { low: 'Alza le braccia verso il soffitto', high: 'Abbassa le spalle' },
+  },
+  'Downward Dog': {
+    'Anca dx':       { low: 'Solleva i fianchi, forma una V', high: 'Abbassa i fianchi' },
+    'Gomito dx':     { low: 'Tendi le braccia', high: 'Piega i gomiti' },
+    'Ginocchio dx':  { low: 'Raddrizza le ginocchia', high: 'Piega le ginocchia' },
+  },
+  'Tree Pose': {
+    'Ginocchio sin': { low: 'Piega il ginocchio sinistro verso l\'esterno', high: 'Porta il piede più in alto' },
+    'Ginocchio dx':  { low: 'Tendi la gamba destra', high: 'Raddrizza la gamba destra' },
+    'Schiena':       { low: 'Allunga la schiena', high: 'Rilassa le spalle' },
+  },
+};
+
+const DESCRIZIONI_PREP = {
+  'Warrior I':    'Mettiti in posizione. Piega il ginocchio destro a novanta gradi e alza le braccia in alto!',
+  'Downward Dog': 'Metti mani e piedi a terra e porta i fianchi verso il soffitto, come una V!',
+  'Tree Pose':    'Stai in equilibrio sulla gamba destra. Piega la sinistra verso l\'esterno, schiena dritta!',
+};
+
+// ── MediaPipe landmarks index ──────────────────────────────────────────
+const IDX = {
+  left_shoulder:11, right_shoulder:12, left_elbow:13, right_elbow:14,
+  left_wrist:15, right_wrist:16, left_hip:23, right_hip:24,
+  left_knee:25, right_knee:26, left_ankle:27, right_ankle:28,
+  left_ear:7, right_ear:8, nose:0,
+};
+const CONNESSIONI = [[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28]];
+
+// ── DOM refs ───────────────────────────────────────────────────────────
+const webcam = document.getElementById('webcam');
+const canvas = document.getElementById('pose-canvas');
+const ctx = canvas.getContext('2d');
+
+let poseLandmarker = null;
+let animFrameId = null;
+let lastVideoTime = -1;
+
+// ── Init ───────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    const vision = await FilesetResolver.forVisionTasks(
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm'
+    );
+    poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
+      baseOptions: {
+        modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task',
+        delegate: 'GPU',
+      },
+      runningMode: 'VIDEO',
+      numPoses: 1,
+      minPoseDetectionConfidence: 0.6,
+      minTrackingConfidence: 0.6,
+    });
+    document.getElementById('loading').classList.add('hidden');
+    initVoice();
+    showScreen('screen-welcome');
+    // Piccola pausa per dare tempo alle voci di caricarsi
+    setTimeout(() => speakAstrid(_pick(ASTRID.benvenuto)), 1200);
+  } catch(e) {
+    document.querySelector('#loading p').textContent = 'Errore caricamento: ' + e.message;
+  }
+}
+
+// ── Screen navigation ──────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  // Forza play del video Astrid quando torna alla welcome
+  if (id === 'screen-welcome') {
+    const v = document.getElementById('astrid-video');
+    if (v) v.play().catch(() => {});
+  }
+}
+window.showScreen = showScreen;
+
+// Mappa navigazione back
+const BACK_MAP = {
+  'screen-level':   () => showScreen('screen-welcome'),
+  'screen-mode':    () => showScreen('screen-level'),
+  'screen-poses':   () => showScreen('screen-mode'),
+  'screen-prep':    () => state.modalita === 'free' ? showScreen('screen-poses') : showScreen('screen-mode'),
+};
+window.goBack = (currentScreen) => {
+  speechSynthesis.cancel();
+  ttsQueue.length = 0;
+  ttsBusy = false;
+  const fn = BACK_MAP[currentScreen];
+  if (fn) {
+    fn();
+    setTimeout(() => speakAstrid(ASTRID.indietro(state.nome || 'amico')), 200);
+  }
+};
+
+// ── Welcome screen ─────────────────────────────────────────────────────
+window.onNomeInput = () => {
+  const v = document.getElementById('input-nome').value.trim();
+  document.getElementById('btn-start').disabled = !v;
+  // Fumetto reagisce al nome
+  const fumetto = document.getElementById('astrid-fumetto');
+  if (v.length > 0) {
+    fumetto.textContent = '';
+    fumetto.insertAdjacentHTML('afterbegin', '<span style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--terra);display:block;margin-bottom:5px">✦ Astrid</span>');
+    fumetto.innerHTML += `Ciao <strong>${v}</strong>! Sono pronta ad allenarti. Iniziamo?`;
+  } else {
+    fumetto.textContent = '';
+    fumetto.insertAdjacentHTML('afterbegin', '<span style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--terra);display:block;margin-bottom:5px">✦ Astrid</span>');
+    fumetto.innerHTML += 'Ciao! Sono Astrid, la tua coach di yoga. Dimmi come ti chiami per iniziare!';
+  }
+};
+window.goToLevel = () => {
+  state.nome = document.getElementById('input-nome').value.trim();
+  _nav.lastTime = Date.now(); _nav.screenCount = 1;
+  showScreen('screen-level');
+  speakAstrid(ASTRID.saluto(state.nome), { interrompi: true });
+  setTimeout(() => speakAstrid(ASTRID.livello.arrivo(state.nome)), 2200);
+};
+
+// ── Level screen ───────────────────────────────────────────────────────
+window.selectLevel = (livello) => {
+  state.livello = livello;
+  document.querySelectorAll('.level-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById(`card-${livello.toLowerCase()}`).classList.add('selected');
+  document.getElementById('btn-level-next').disabled = false;
+  speakAstrid(ASTRID.livello[livello], { interrompi: true });
+};
+window.goToMode = () => {
+  if (_checkVelocita(state.nome)) return;
+  showScreen('screen-mode');
+  setTimeout(() => speakAstrid(ASTRID.modalita.arrivo()), 400);
+};
+
+// ── Mode screen ────────────────────────────────────────────────────────
+window.startGuided = () => {
+  state.modalita = 'guided';
+  state.seqIdx = 0;
+  state.posaCorrente = SEQUENZA_GUIDATA[0];
+  _checkVelocita(state.nome);
+  showPrepScreen();
+  setTimeout(() => speakAstrid(ASTRID.modalita.guidata(state.nome), { interrompi: true }), 300);
+};
+window.goToPoses = () => {
+  state.modalita = 'free';
+  _checkVelocita(state.nome);
+  showScreen('screen-poses');
+  setTimeout(() => speakAstrid(ASTRID.modalita.libera()), 300);
+};
+window.selectPose = (posa) => {
+  state.posaCorrente = posa;
+  _checkVelocita(state.nome);
+  showPrepScreen();
+  speakAstrid(ASTRID.pose[posa](), { interrompi: true });
+  setTimeout(() => speakAstrid(ASTRID.prep[posa]()), 3500);
+};
+
+// ── Prep screen ────────────────────────────────────────────────────────
+function showPrepScreen() {
+  const posa = state.posaCorrente;
+  document.getElementById('prep-pose-name').textContent = posa;
+  document.getElementById('prep-pose-emoji').textContent = POSE_EMOJI[posa];
+  document.getElementById('prep-desc').textContent = POSE_BASE[posa].desc;
+  if (state.modalita === 'guided') {
+    document.getElementById('prep-seq-label').textContent = `Posa ${state.seqIdx + 1} di ${SEQUENZA_GUIDATA.length}`;
+  } else {
+    document.getElementById('prep-seq-label').textContent = 'Sessione libera';
+  }
+  showScreen('screen-prep');
+}
+
+window.startSession = async () => {
+  showScreen('screen-session');
+  await startCamera();
+  initSessionState();
+  speakAstrid(ASTRID.sessione.inizio(), { interrompi: true });
+};
+
+// ── Camera ─────────────────────────────────────────────────────────────
+let currentFacing = 'environment'; // posteriore di default — FOV più ampio
+
+async function startCamera() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: currentFacing,
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+      },
+      audio: false,
+    });
+    webcam.srcObject = stream;
+    await new Promise(r => webcam.onloadedmetadata = r);
+    canvas.width = webcam.videoWidth;
+    canvas.height = webcam.videoHeight;
+    // Specchio solo per camera frontale
+    const mirror = currentFacing === 'user' ? 'scaleX(-1)' : 'none';
+    webcam.style.transform = mirror;
+    canvas.style.transform = mirror;
+    requestAnimationFrame(detectLoop);
+  } catch(e) {
+    // Fallback: se posteriore non disponibile (PC) usa frontale
+    if (currentFacing === 'environment') {
+      currentFacing = 'user';
+      return startCamera();
+    }
+    alert('Camera non accessibile: ' + e.message);
+  }
+}
+
+window.flipCamera = async () => {
+  stopCamera();
+  currentFacing = currentFacing === 'environment' ? 'user' : 'environment';
+  await startCamera();
+};
+
+function stopCamera() {
+  if (webcam.srcObject) {
+    webcam.srcObject.getTracks().forEach(t => t.stop());
+    webcam.srcObject = null;
+  }
+  if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+}
+
+// ── Session state ──────────────────────────────────────────────────────
+function initSessionState() {
+  state.timerInizio = null;
+  state.posaNota = false;
+  state.tCoach = 0;
+  state.tPosiz = 0;
+  state.corpoVisible = false;
+  state._said10 = false;
+  state._saidLost = false;
+  state.sessionStats = { poseCompletate: [], angoliOk: 0, angoliTot: 0, tInizio: Date.now() };
+
+  const posa = state.posaCorrente;
+  document.getElementById('session-pose-name').textContent = posa;
+  document.getElementById('session-user-badge').textContent = state.nome;
+  const lb = document.getElementById('session-level-badge');
+  lb.textContent = state.livello;
+  lb.className = `badge ${state.livello === 'Master' ? 'badge-red' : state.livello === 'Intermedio' ? 'badge-accent' : 'badge-green'}`;
+  buildJointRows(posa);
+}
+
+function buildJointRows(posa) {
+  const cfg = getPoseConfig(posa);
+  const container = document.getElementById('obj-rows');
+  container.innerHTML = cfg.controlli.map((c, i) => `
+    <div class="obj-row" id="objrow-${i}">
+      <div class="obj-dot" id="objdot-${i}" style="background:var(--muted)"></div>
+      <div class="obj-name">${c.nome}</div>
+    </div>
+  `).join('');
+}
+
+function getPoseConfig(posa) {
+  const base = POSE_BASE[posa];
+  const te = LIVELLI[state.livello].tolExtra;
+  return {
+    ...base,
+    controlli: base.controlli.map(c => ({ ...c, tol: c.tol + te })),
+  };
+}
+
+// ── Detection loop ─────────────────────────────────────────────────────
+function detectLoop() {
+  animFrameId = requestAnimationFrame(detectLoop);
+  if (webcam.readyState < 2) return;
+  if (webcam.currentTime === lastVideoTime) return;
+  lastVideoTime = webcam.currentTime;
+
+  const results = poseLandmarker.detectForVideo(webcam, performance.now());
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const posa = state.posaCorrente;
+  const cfg = getPoseConfig(posa);
+  const now = Date.now() / 1000;
+
+  if (results.landmarks && results.landmarks.length > 0) {
+    const lms = results.landmarks[0];
+    state.corpoVisible = true;
+
+    drawSkeleton(lms);
+
+    const risultati = [];
+    for (const c of cfg.controlli) {
+      const pa = getLmPoint(lms, c.punti[0]);
+      const pb = getLmPoint(lms, c.punti[1]);
+      const pc = getLmPoint(lms, c.punti[2]);
+      const ang = calcolaAngolo(pa, pb, pc);
+      const ok = Math.abs(ang - c.target) <= c.tol;
+      risultati.push({ nome: c.nome, ang, target: c.target, tol: c.tol, ok });
+      state.sessionStats.angoliTot++;
+      if (ok) state.sessionStats.angoliOk++;
+    }
+
+    updateFeedbackUI(risultati);
+    handleSessionLogic(risultati, now, posa);
+
+  } else {
+    // Corpo non visto: parla solo se era visibile prima (cambio stato) oppure ogni 20s
+    if (state.corpoVisible || now - state.tPosiz > 20) {
+      showAstridBubble('Posizionati davanti alla camera!');
+      if (state.corpoVisible) speakAstrid(ASTRID.sessione.corpoNonVisto());
+      state.tPosiz = now;
+    }
+    state.corpoVisible = false;
+    resetTimerUI();
+  }
+}
+
+function getLmPoint(lms, nome) {
+  const lm = lms[IDX[nome]];
+  return [lm.x * canvas.width, lm.y * canvas.height];
+}
+
+function drawSkeleton(lms) {
+  const w = canvas.width, h = canvas.height;
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(196,113,74,0.55)';
+  for (const [a, b] of CONNESSIONI) {
+    ctx.beginPath();
+    ctx.moveTo(lms[a].x * w, lms[a].y * h);
+    ctx.lineTo(lms[b].x * w, lms[b].y * h);
+    ctx.stroke();
+  }
+  for (let i = 0; i < 33; i++) {
+    ctx.beginPath();
+    ctx.arc(lms[i].x * w, lms[i].y * h, 4, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(196,113,74,0.85)';
+    ctx.fill();
+  }
+}
+
+function updateFeedbackUI(risultati) {
+  risultati.forEach((r, i) => {
+    const delta = Math.abs(r.ang - r.target);
+    const col = r.ok ? 'var(--green)' : delta < 25 ? 'var(--orange)' : 'var(--red)';
+    const dot = document.getElementById(`objdot-${i}`);
+    if (dot) dot.style.background = col;
+  });
+  const bad = risultati.find(r => !r.ok);
+  const tip = document.getElementById('tip-text');
+  if (!bad) {
+    tip.textContent = 'Postura perfetta — tieni!';
+    tip.style.color = 'var(--green)';
+  } else {
+    tip.textContent = getCoaching(state.posaCorrente, bad.nome, bad.ang, bad.target);
+    tip.style.color = 'var(--text)';
+  }
+}
+
+function handleSessionLogic(risultati, now, posa) {
+  const allOk = risultati.every(r => r.ok);
+  const DURATA = 20;
+
+  if (allOk) {
+    if (!state.timerInizio) {
+      // Parla solo all'inizio del timer — una volta sola
+      state.timerInizio = now;
+      speakAstrid(ASTRID.sessione.posturaOk());
+    }
+    const elapsed = now - state.timerInizio;
+    const remaining = Math.max(0, DURATA - elapsed);
+    updateTimerUI(remaining, DURATA);
+
+    // Parla solo a 10 secondi rimasti
+    if (Math.round(remaining) === 10 && !state._said10) {
+      state._said10 = true;
+      speakAstrid(ASTRID.sessione.dieciSecondi());
+    }
+
+    if (remaining === 0 && !state.posaNota) {
+      state.posaNota = true;
+      if (!state.sessionStats.poseCompletate.includes(posa))
+        state.sessionStats.poseCompletate.push(posa);
+
+      if (state.modalita === 'guided') {
+        state.seqIdx++;
+        if (state.seqIdx < SEQUENZA_GUIDATA.length) {
+          const next = SEQUENZA_GUIDATA[state.seqIdx];
+          state.posaCorrente = next;
+          speakAstrid(ASTRID.sessione.posaCompletata(state.nome), { interrompi: true });
+          setTimeout(() => {
+            state.timerInizio = null;
+            state.posaNota = false;
+            state._said10 = false;
+            document.getElementById('session-pose-name').textContent = next;
+            buildJointRows(next);
+            showPrepScreenInSession(next);
+          }, 2000);
+        } else {
+          speakAstrid(ASTRID.sessione.tuttoCompletato(state.nome), { interrompi: true });
+          setTimeout(() => endSession(), 3500);
+        }
+      } else {
+        speakAstrid(ASTRID.sessione.posaCompletata(state.nome), { interrompi: true });
+        setTimeout(() => endSession(), 3000);
+      }
+    }
+  } else {
+    // Postura persa mentre il timer era attivo — commento una volta sola
+    if (state.timerInizio !== null && !state._saidLost) {
+      state._saidLost = true;
+      const bad = risultati.find(r => !r.ok);
+      if (bad) speakAstrid(getCoaching(posa, bad.nome, bad.ang, bad.target));
+    }
+    // Coaching periodico: ogni 15 secondi, non di più
+    if (now - state.tCoach > 15) {
+      const bad = risultati.find(r => !r.ok);
+      if (bad) {
+        speakAstrid(getCoaching(posa, bad.nome, bad.ang, bad.target));
+        state.tCoach = now;
+      }
+    }
+    state.timerInizio = null;
+    state._said10 = false;
+    state._saidLost = false;
+    resetTimerUI();
+  }
+}
+
+function showPrepScreenInSession(posa) {
+  // Brief overlay in session when switching pose
+  const bubble = document.getElementById('astrid-session-bubble');
+  bubble.textContent = `Prossima: ${POSE_EMOJI[posa]} ${posa}`;
+  bubble.classList.add('visible');
+  setTimeout(() => bubble.classList.remove('visible'), 3000);
+}
+
+function updateTimerUI(remaining, total) {
+  const pct = ((total - remaining) / total) * 100;
+  document.getElementById('timer-bar').style.width = pct + '%';
+  document.getElementById('timer-countdown').textContent = Math.ceil(remaining) + 's';
+  document.getElementById('timer-wrap').style.display = 'block';
+}
+
+function resetTimerUI() {
+  document.getElementById('timer-bar').style.width = '0%';
+  document.getElementById('timer-countdown').textContent = '20s';
+  document.getElementById('timer-wrap').style.display = 'none';
+}
+
+function showAstridBubble(msg) {
+  // Il suggerimento è ora inline nel pannello bottom — nessun overlay separato
+  const tip = document.getElementById('tip-text');
+  if (tip) { tip.textContent = msg; tip.style.color = 'var(--terra)'; }
+}
+
+// ── Session exit ───────────────────────────────────────────────────────
+window.exitSession = () => endSession();
+function endSession() {
+  stopCamera();
+  showSummary();
+}
+
+// ── Summary ────────────────────────────────────────────────────────────
+function showSummary() {
+  const s = state.sessionStats;
+  const durata = Math.floor((Date.now() - s.tInizio) / 1000);
+  const acc = Math.round(s.angoliOk / Math.max(s.angoliTot, 1) * 100);
+  const nPose = s.poseCompletate.length;
+  const score = Math.min(100, acc + nPose * 10);
+
+  const m = Math.floor(durata / 60);
+  const ss = String(durata % 60).padStart(2, '0');
+
+  document.getElementById('stat-pose').textContent = `${nPose}/${state.modalita === 'guided' ? 3 : 1}`;
+  document.getElementById('stat-acc').textContent = acc + '%';
+  document.getElementById('stat-dur').textContent = `${m}:${ss}`;
+  document.getElementById('stat-level').textContent = state.livello;
+
+  // Score ring animation
+  const circumference = 314;
+  const offset = circumference - (score / 100) * circumference;
+  const ring = document.getElementById('score-ring-circle');
+  const scoreEl = document.getElementById('summary-score');
+  ring.style.stroke = score >= 80 ? 'var(--green)' : score >= 50 ? 'var(--accent)' : 'var(--orange)';
+  ring.style.strokeDashoffset = circumference;
+  scoreEl.style.color = ring.style.stroke;
+  setTimeout(() => {
+    ring.style.transition = 'stroke-dashoffset 1.2s ease';
+    ring.style.strokeDashoffset = offset;
+  }, 300);
+  // Animate number
+  let cur = 0;
+  const step = score / 40;
+  const iv = setInterval(() => {
+    cur = Math.min(cur + step, score);
+    scoreEl.textContent = Math.round(cur);
+    if (cur >= score) clearInterval(iv);
+  }, 30);
+
+  // Astrid message
+  let msg, voiceMsg;
+  if (score >= 80) {
+    msg = `🌟 ${ASTRID.riepilogo.top(state.nome)}`;
+    voiceMsg = ASTRID.riepilogo.top(state.nome);
+    document.getElementById('summary-title').textContent = 'Sessione completata! 🎉';
+  } else if (score >= 50) {
+    msg = `👍 ${ASTRID.riepilogo.medio(state.nome)}`;
+    voiceMsg = ASTRID.riepilogo.medio(state.nome);
+    document.getElementById('summary-title').textContent = 'Ben fatto!';
+  } else {
+    msg = `💪 ${ASTRID.riepilogo.base(state.nome)}`;
+    voiceMsg = ASTRID.riepilogo.base(state.nome);
+    document.getElementById('summary-title').textContent = 'Continua ad allenarti!';
+  }
+  document.getElementById('summary-sub').textContent = `Livello ${state.livello}`;
+  document.getElementById('summary-astrid-msg').textContent = msg;
+  speakAstrid(voiceMsg, { interrompi: true });
+
+  // Pose chips
+  const chips = document.getElementById('summary-pose-chips');
+  chips.innerHTML = s.poseCompletate.length > 0
+    ? s.poseCompletate.map(p => `<div class="pose-chip">${POSE_EMOJI[p]} ${p}</div>`).join('')
+    : '<span style="color:var(--muted);font-size:13px">Nessuna posa completata</span>';
+
+  // Suggestion
+  if (score < 80) {
+    const suggEl = document.getElementById('summary-suggestion');
+    suggEl.style.display = 'block';
+    document.getElementById('summary-suggestion-text').textContent =
+      acc < 70 ? 'Lavora sulla precisione degli angoli' : 'Prova a salire di livello!';
+  }
+
+  showScreen('screen-summary');
+}
+
+window.restartApp = () => {
+  state.seqIdx = 0;
+  state.posaCorrente = null;
+  state.timerInizio = null;
+  state.posaNota = false;
+  state._said10 = false;
+  document.getElementById('summary-suggestion').style.display = 'none';
+  document.getElementById('score-ring-circle').style.transition = 'none';
+  document.getElementById('score-ring-circle').style.strokeDashoffset = '314';
+  showScreen('screen-welcome');
+};
+
+// ── Math helpers ───────────────────────────────────────────────────────
+function calcolaAngolo([ax,ay], [bx,by], [cx,cy]) {
+  const ba = [ax-bx, ay-by], bc = [cx-bx, cy-by];
+  const dot = ba[0]*bc[0] + ba[1]*bc[1];
+  const mag = Math.sqrt(ba[0]**2+ba[1]**2) * Math.sqrt(bc[0]**2+bc[1]**2);
+  return Math.round(Math.acos(Math.max(-1, Math.min(1, dot/(mag+1e-6)))) * 180 / Math.PI);
+}
+
+function getCoaching(posa, nome, ang, target) {
+  const c = (COACHING[posa] || {})[nome] || {};
+  return ang < target ? (c.low || `Correggi ${nome}`) : (c.high || `Correggi ${nome}`);
+}
+
+// ── Web Speech API TTS ──────────────────────────────────────────────────
+
+function initVoice() {
+  const load = () => {
+    const all = speechSynthesis.getVoices();
+    const it = all.filter(v => v.lang.startsWith('it'));
+    if (it.length === 0) return;
+    const femminili = ['alice', 'federica', 'sara', 'giulia', 'sofia', 'female', 'woman'];
+    const cloud = it.filter(v => !v.localService);
+    const local = it.filter(v => v.localService);
+    const preferita = (lista) =>
+      lista.find(v => femminili.some(n => v.name.toLowerCase().includes(n))) || lista[0];
+    state.wsVoice = preferita(cloud) || preferita(local) || it[0];
+    console.log('Voce Astrid:', state.wsVoice?.name, state.wsVoice?.lang);
+  };
+  load();
+  speechSynthesis.onvoiceschanged = load;
+}
+
+// ── Astrid personality engine ───────────────────────────────────────────
+const _nav = { lastTime: 0, screenCount: 0 };
+function _pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+const ASTRID = {
+  benvenuto: [
+    'Ciao! Sono Astrid, la tua coach personale di yoga. Dimmi il tuo nome così possiamo iniziare insieme!',
+    'Benvenuta in Allinea! Sono Astrid, la tua coach di yoga. Come ti chiami?',
+    'Ciao e benvenuto! Sono Astrid. Pronta ad allenarti? Prima dimmi come ti chiami!',
+  ],
+  saluto: (nome) => _pick([
+    `Ciao ${nome}! Sono felice di allenarti oggi.`,
+    `${nome}, che bello averti qui! Iniziamo?`,
+    `Perfetto ${nome}! Sono pronta a guidarti.`,
+  ]),
+  veloce: (nome) => _pick([
+    `Wow ${nome}, sei velocissimo nelle scelte! Mi piace questa energia!`,
+    `Che decisione rapida ${nome}! Vedo che sai già cosa vuoi.`,
+    `${nome} non perde tempo! Ottimo, andiamo!`,
+  ]),
+  livello: {
+    arrivo: (nome) => _pick([
+      `Allora ${nome}, sei alle prime armi o già esperto? Scegli il tuo livello!`,
+      `${nome}, quanto è allenato il tuo corpo? Scegli onestamente, è per il tuo bene!`,
+      `Scegliamo il livello giusto per te ${nome}. Puoi sempre cambiarlo!`,
+    ]),
+    Principiante: _pick([
+      'Ottima scelta! Tolleranze più ampie, puoi sbagliare un po l angolo. Perfetto per imparare!',
+      'Principiante, saggio! Meglio iniziare con calma e migliorare gradualmente.',
+    ]),
+    Intermedio: _pick([
+      'Intermedio! Le pose richiederanno più precisione ma ce la fai sicuramente.',
+      'Livello Intermedio, la via di mezzo! Abbastanza sfidante da farti crescere.',
+    ]),
+    Master: _pick([
+      'Master! Sei coraggioso! Gli angoli devono essere quasi perfetti. Sei pronto?',
+      'Wow, direttamente Master! Rispetto. Preparati a sudare.',
+    ]),
+  },
+  modalita: {
+    arrivo: () => _pick([
+      'Come preferisci allenarti oggi? Posso guidarti io oppure scegli tu le pose.',
+      'Vuoi che ti accompagni in una sequenza completa, o preferisci scegliere tu?',
+    ]),
+    guidata: (nome) => _pick([
+      `Perfetto ${nome}! Ti porto in tre pose: Tree Pose, Warrior I e Downward Dog. Venti secondi per ognuna. Seguimi!`,
+      `Allenamento guidato! Ti guido io ${nome}. Tre pose, venti secondi ciascuna. Iniziamo con Tree Pose!`,
+    ]),
+    libera: () => _pick([
+      'Sessione libera! Mi piace. Scegli la posa che preferisci.',
+      'Bene, scegli tu! Quale posa vuoi affrontare oggi?',
+    ]),
+  },
+  pose: {
+    arrivo: () => _pick([
+      'Eccellente! Quale posa vuoi praticare oggi?',
+      'Scegli la tua posa. Ognuna ha i suoi benefici!',
+    ]),
+    'Warrior I': () => _pick([
+      'Warrior I! Il Guerriero rafforza le gambe e apre il petto. Piega il ginocchio destro a novanta gradi e alza le braccia.',
+      'Ottima scelta! Il Guerriero richiede forza e equilibrio. Ginocchio destro a novanta, braccia in alto.',
+    ]),
+    'Downward Dog': () => _pick([
+      'Downward Dog, classico dello yoga! Mani e piedi a terra, fianchi verso il soffitto. Ottimo per schiena e polpacci.',
+      'Il Cane a testa in giù! Forma una V con il corpo. Ottimo per allungare tutta la schiena.',
+    ]),
+    'Tree Pose': () => _pick([
+      'Tree Pose! L albero. Equilibrio puro. Stai sulla gamba destra, piega la sinistra verso l esterno. Concentrati!',
+      'La posa dell albero migliora l equilibrio. Tieni lo sguardo fisso su un punto davanti a te.',
+    ]),
+  },
+  prep: {
+    'Warrior I': () => 'Preparati per il Guerriero! Fai un passo indietro con la sinistra, piega il ginocchio destro a novanta gradi e alza le braccia in alto. Dimmi quando sei pronto!',
+    'Downward Dog': () => 'Preparati per il Cane a testa in giù! Metti mani e piedi a terra e porta i fianchi verso il soffitto formando una V. Dimmi quando sei pronto!',
+    'Tree Pose': () => 'Preparati per la Tree Pose! Stai in piedi, poi appoggia il piede sinistro sulla coscia destra e apri il ginocchio verso l esterno. Dimmi quando sei pronto!',
+  },
+  sessione: {
+    inizio: () => _pick([
+      'Posizionati bene davanti alla camera così posso vederti tutto!',
+      'Mettiti in posizione! Ho bisogno di vedere tutto il tuo corpo.',
+    ]),
+    corpoNonVisto: () => _pick([
+      'Non ti vedo bene! Fai un passo indietro per favore.',
+      'Allontanati un po dalla camera, devo vedere tutto il tuo corpo.',
+    ]),
+    posturaOk: () => _pick([
+      'Perfetto! Tieni questa posizione per venti secondi!',
+      'Ottimo! Postura corretta. Venti secondi, tieni fermo!',
+      'Bravissimo! Esattamente così. Venti secondi!',
+    ]),
+    dieciSecondi: () => _pick([
+      'Dieci secondi ancora! Ce la fai, non mollare!',
+      'Quasi! Ancora dieci secondi. Tieni duro!',
+      'Metà strada superata! Ancora dieci secondi.',
+    ]),
+    posaCompletata: (nome) => _pick([
+      `Bravissimo ${nome}! Posa completata! Ottimo lavoro!`,
+      `Fantastico ${nome}! Ce l hai fatta! Sei in forma!`,
+    ]),
+    tuttoCompletato: (nome) => _pick([
+      `${nome} hai completato tutto l allenamento! Sono orgogliosa di te!`,
+      `Allenamento completato ${nome}! Grandioso! Torna presto!`,
+    ]),
+  },
+  indietro: (nome) => _pick([
+    `Nessun problema ${nome}, torniamo indietro.`,
+    `Ok ${nome}, ci si ripensa! Nessun problema.`,
+    `Certo ${nome}, un passo indietro. Prenditi il tuo tempo.`,
+  ]),
+  riepilogo: {
+    top: (nome) => _pick([
+      `Fantastico ${nome}! Posture quasi perfette! Sei davvero bravo!`,
+      `${nome} che sessione straordinaria! Continua così!`,
+    ]),
+    medio: (nome) => _pick([
+      `Buon lavoro ${nome}! Puoi ancora migliorare, ma sei sulla strada giusta!`,
+      `${nome} bene! Con un po di pratica in più diventerai imbattibile!`,
+    ]),
+    base: (nome) => _pick([
+      `Non mollare ${nome}! Lo yoga richiede pratica. Ogni sessione ti migliora!`,
+      `${nome} ogni inizio è difficile! Torna presto e vedrai i progressi!`,
+    ]),
+  },
+};
+
+// ── TTS engine ─────────────────────────────────────────────────────────
+let ttsBusy = false;
+const ttsQueue = [];
+let _lastSpoken = '';
+let _lastSpokenTime = 0;
+
+function speakAstrid(testo, { interrompi = false } = {}) {
+  if (!testo) return;
+  const now = Date.now();
+  if (testo === _lastSpoken && now - _lastSpokenTime < 3000) return;
+  if (interrompi) {
+    ttsQueue.length = 0;
+    speechSynthesis.cancel();
+    ttsBusy = false;
+  }
+  if (ttsQueue[ttsQueue.length - 1] === testo) return;
+  ttsQueue.push(testo);
+  if (!ttsBusy) _processQueue();
+}
+
+function _processQueue() {
+  if (ttsQueue.length === 0) { ttsBusy = false; return; }
+  ttsBusy = true;
+  const testo = ttsQueue.shift();
+  _lastSpoken = testo;
+  _lastSpokenTime = Date.now();
+  const utt = new SpeechSynthesisUtterance(testo);
+  utt.lang = 'it-IT';
+  utt.rate = 1.08;
+  utt.pitch = 1.05;
+  utt.volume = 1.0;
+  if (state.wsVoice) utt.voice = state.wsVoice;
+  utt.onend = () => _processQueue();
+  utt.onerror = () => _processQueue();
+  speechSynthesis.speak(utt);
+}
+
+function _checkVelocita(nome) {
+  const now = Date.now();
+  const delta = now - _nav.lastTime;
+  _nav.lastTime = now;
+  _nav.screenCount++;
+  if (_nav.screenCount > 1 && delta < 4000) {
+    speakAstrid(ASTRID.veloce(nome), { interrompi: true });
+    return true;
+  }
+  return false;
+}
+
+// ── Start ──────────────────────────────────────────────────────────────
+// Forza play video al primo tocco/click — richiesto da alcuni browser
+document.addEventListener('click', () => {
+  const v = document.getElementById('astrid-video');
+  if (v && v.paused) v.play().catch(() => {});
+}, { once: true });
+
+window.speakAstrid = speakAstrid;
+init();
+</script>
+</body>
+</html>
