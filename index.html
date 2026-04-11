@@ -143,8 +143,8 @@
   .pose-card .pose-name { font-size: 11px; font-weight: 500; text-align: center; color: var(--text); letter-spacing: 0.02em; }
 
   /* ── Prep ── */
-  #screen-prep { justify-content: flex-start; padding-top: 64px; padding-bottom: 44px; gap: 0; }
-  .prep-video-wrap { width: 100%; aspect-ratio: 4/3; border-radius: 20px; overflow: hidden; background: var(--surface2); border: 1px solid var(--border2); position: relative; margin-bottom: 20px; flex-shrink: 0; }
+  #screen-prep { justify-content: flex-start; padding-top: 64px; padding-bottom: 44px; gap: 0; overflow-y: auto; }
+  .prep-video-wrap { width: 100%; max-height: 220px; aspect-ratio: 4/3; border-radius: 20px; overflow: hidden; background: var(--surface2); border: 1px solid var(--border2); position: relative; margin-bottom: 16px; flex-shrink: 0; }
   #prep-video { width: 100%; height: 100%; object-fit: cover; display: block; }
   .prep-video-label { position: absolute; top: 10px; left: 12px; font-size: 9px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--terra); background: rgba(247,243,238,0.9); padding: 3px 8px; border-radius: 8px; }
   .prep-video-fallback { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
@@ -163,14 +163,12 @@
      e può stare ~25% più vicino rimanendo nel frame. MediaPipe analizza i pixel originali. */
   #webcam {
     position: absolute;
-    width: 133.3%; height: 133.3%;          /* 1/0.75 = 133.3% */
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%) scale(0.75);
-    transform-origin: center center;
+    width: 100%; height: 100%;
+    top: 0; left: 0;
     object-fit: cover;
   }
   #webcam.mirror {
-    transform: translate(-50%, -50%) scale(0.75) scaleX(-1);
+    transform: scaleX(-1);
   }
   #pose-canvas {
     position: absolute; inset: 0; width: 100%; height: 100%;
@@ -183,8 +181,8 @@
   }
 
   .session-panel { position: absolute; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background: rgba(247,243,238,0.88); border: 1px solid rgba(160,140,115,0.25); border-radius: 14px; }
-  #panel-top { top: 14px; left: 14px; width: fit-content; max-width: calc(100% - 110px); padding: 7px 13px; }
-  #panel-bottom { bottom: 14px; left: 50%; transform: translateX(-50%); width: fit-content; min-width: 180px; max-width: min(92vw, 380px); padding: 9px 14px; }
+  #panel-top { display: none; }
+  #panel-bottom { display: none; }
 
   .panel-pose-name { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 400; color: var(--text); }
 
@@ -202,6 +200,15 @@
   .timer-bar-fill { height: 100%; border-radius: 2px; background: var(--sage); transition: width 0.5s linear; }
   #timer-countdown { font-size: 13px; font-weight: 500; color: var(--sage2); }
 
+  #target-panel { position: absolute; top: 14px; left: 14px; z-index: 15; background: rgba(20,20,24,0.82); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); color: #fff; padding: 10px 12px; border-radius: 12px; font-family: 'Jost', sans-serif; font-size: 12px; min-width: 180px; max-width: 240px; line-height: 1.5; pointer-events: none; border: 1px solid rgba(255,255,255,0.1); }
+  #target-panel .tp-title { font-weight: 600; font-size: 13px; letter-spacing: 0.04em; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.12); }
+  #target-panel .tp-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 3px 0; }
+  #target-panel .tp-name { opacity: 0.9; }
+  #target-panel .tp-val { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 11px; }
+  #target-panel .tp-ok .tp-val { color: #4ecb71; }
+  #target-panel .tp-bad .tp-val { color: #ff6b5e; }
+  #target-panel .tp-pending .tp-val { color: rgba(255,255,255,0.5); }
+  #target-panel .tp-tol { margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.12); font-size: 10px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.06em; }
   #btn-exit-session { position: absolute; top: 14px; right: 14px; width: 30px; height: 30px; border-radius: 50%; background: rgba(247,243,238,0.85); border: 1px solid var(--border2); color: var(--accent); font-size: 13px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
   #btn-flip-camera { position: absolute; top: 52px; right: 14px; width: 30px; height: 30px; border-radius: 50%; background: rgba(247,243,238,0.85); border: 1px solid var(--border2); color: var(--accent); font-size: 15px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
 
@@ -246,13 +253,13 @@
   .divider { width: 100%; height: 1px; background: var(--border); margin: 4px 0; }
   .seq-preview { display: flex; align-items: center; gap: 8px; margin: 10px 0; }
 
-  /* ── Feedback visivo — strip in basso, non invasivo ── */
+  /* ── Feedback visivo — pill compatta in basso ── */
   #big-feedback {
-    position: absolute; left: 50%; bottom: 82px; transform: translateX(-50%) translateY(12px);
-    width: min(92vw, 440px);
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    border-radius: 18px; padding: 14px 20px;
-    display: flex; flex-direction: row; align-items: center; gap: 12px;
+    position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%) translateY(10px);
+    width: auto; min-width: 120px; max-width: min(80vw, 320px);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-radius: 30px; padding: 10px 18px;
+    display: flex; flex-direction: row; align-items: center; gap: 10px;
     z-index: 8; pointer-events: none;
     transition: opacity 0.3s, transform 0.3s;
     opacity: 0;
@@ -261,29 +268,39 @@
     opacity: 1; transform: translateX(-50%) translateY(0);
   }
   #big-feedback.ok {
-    background: rgba(90,138,94,0.28);
-    border: 1.5px solid rgba(90,138,94,0.5);
+    background: rgba(90,138,94,0.82);
+    border: 1.5px solid rgba(90,138,94,0.6);
   }
   #big-feedback.bad {
-    background: rgba(247,243,238,0.92);
-    border: 1.5px solid rgba(196,113,74,0.4);
+    background: rgba(20,14,8,0.80);
+    border: 1.5px solid rgba(196,113,74,0.5);
+    flex-direction: column; align-items: flex-start;
+    max-width: min(88vw, 340px); width: min(88vw, 340px);
+    padding: 12px 16px; gap: 6px; border-radius: 18px;
   }
-  #bf-icon { font-size: 28px; line-height: 1; flex-shrink: 0; }
+  #bf-icon { font-size: 16px; line-height: 1; flex-shrink: 0; }
+  #big-feedback.bad #bf-icon {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--terra); background: rgba(196,113,74,0.2); border-radius: 6px; padding: 3px 8px;
+  }
   #bf-main {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(18px, 4.5vw, 24px);
-    font-weight: 400; color: var(--text);
-    text-align: left; line-height: 1.2; flex: 1;
+    font-family: 'Jost', sans-serif;
+    font-size: clamp(13px, 3.5vw, 15px);
+    font-weight: 600; color: #fff;
+    text-align: left; line-height: 1.3; flex: 1;
   }
-  #big-feedback.ok #bf-main { color: #2d5a31; }
+  #big-feedback.ok #bf-main { color: #fff; }
   #bf-timer {
-    font-size: clamp(36px, 10vw, 52px);
-    font-weight: 300; font-family: 'Cormorant Garamond', serif;
-    color: var(--sage); line-height: 1; flex-shrink: 0;
+    font-size: clamp(18px, 5vw, 24px);
+    font-weight: 600; font-family: 'Jost', sans-serif;
+    color: rgba(255,255,255,0.9); line-height: 1; flex-shrink: 0;
   }
   #bf-sub {
     display: none;
+    font-size: clamp(11px, 3vw, 13px); color: rgba(255,255,255,0.7);
+    font-weight: 300; line-height: 1.4;
   }
+  #big-feedback.bad #bf-sub { display: block; }
 </style>
 <script src="config.js"></script>
 </head>
@@ -415,7 +432,7 @@
       <div class="level-dot" style="background:#5A8A5E"></div>
       <div class="level-info">
         <div class="level-name">Principiante</div>
-        <div class="level-desc">Tolleranza +20° · Ideale per iniziare</div>
+        <div class="level-desc">Tolleranza ±20° · Ideale per iniziare</div>
       </div>
     </div>
 
@@ -423,7 +440,7 @@
       <div class="level-dot" style="background:#C4714A"></div>
       <div class="level-info">
         <div class="level-name">Intermedio</div>
-        <div class="level-desc">Tolleranza +8° · Pratica regolare</div>
+        <div class="level-desc">Tolleranza ±8° · Pratica regolare</div>
       </div>
       <span class="recommended-badge">Consigliato</span>
     </div>
@@ -572,7 +589,7 @@
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg>
     Indietro
   </button>
-  <div class="stack" style="max-width:400px;width:100%;flex:1;gap:16px;padding:16px 0 0">
+  <div class="stack" style="max-width:400px;width:100%;flex:1;gap:14px;padding:16px 0 24px">
     <div>
       <div class="label" style="margin-bottom:4px" id="prep-seq-label"></div>
       <h2 id="prep-pose-name" style="margin-bottom:14px"></h2>
@@ -599,6 +616,7 @@
     <video id="webcam" autoplay playsinline muted></video>
     <canvas id="pose-canvas"></canvas>
     <canvas id="silhouette-canvas"></canvas>
+    <div id="target-panel"></div>
 
     <!-- Top: nome posa (pill compatta) -->
     <div class="session-panel" id="panel-top">
@@ -713,6 +731,18 @@
 <script type="module">
 import { PoseLandmarker, FilesetResolver, DrawingUtils } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/vision_bundle.mjs";
 
+// ── Polyfill roundRect (Safari < 15.4, Chrome < 99) ───────────────────
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+    this.moveTo(x + r, y);
+    this.lineTo(x + w - r, y); this.quadraticCurveTo(x + w, y, x + w, y + r);
+    this.lineTo(x + w, y + h - r); this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    this.lineTo(x + r, y + h); this.quadraticCurveTo(x, y + h, x, y + h - r);
+    this.lineTo(x, y + r); this.quadraticCurveTo(x, y, x + r, y);
+    this.closePath();
+  };
+}
+
 // ── State ──────────────────────────────────────────────────────────────
 const state = {
   nome: '',
@@ -734,6 +764,160 @@ const state = {
   lastBubbleMsg: '',
   bubbleTimeout: null,
 };
+
+// ── Coach Engine ──────────────────────────────────────────────────────────
+// Macchina a stati che decide se/quando/cosa far dire ad Astrid.
+// Obiettivo: silenzio come default, un solo consiglio alla volta, niente ripetizioni.
+const coach = {
+  state: 'idle',        // idle | lost | entering | adjusting | close | holding
+  stateSince: 0,
+  lastSpokenAt: 0,      // timestamp globale ultimo parlato (qualsiasi origine)
+  lastJoint: null,
+  lastPhraseIdx: -1,
+  lastConfirmAt: 0,
+  posaWhenEntered: null,
+};
+
+// Cooldown minimi per stato (secondi). stateSwitch = prima frase al cambio di stato.
+const COACH_COOLDOWN = {
+  lost:      8,
+  adjusting: 5,
+  close:     7,
+  holding:   10,
+  entering:  0,
+};
+const COACH_GLOBAL_MIN = 3; // minimo assoluto tra due interventi vocali
+
+// Pool di frasi variate per correzioni gentili (usate in stato "close")
+const COACH_FINE = {
+  'Ginocchio dx':  ['piega un po\' di più il ginocchio destro', 'affonda leggermente di più', 'scendi un pelo sul destro'],
+  'Ginocchio sin': ['allunga meglio la gamba dietro', 'distendi un po\' di più il ginocchio sinistro', 'tieni dietro la gamba tesa'],
+  'Spalla dx':     ['apri un po\' di più le braccia', 'rilassa le spalle mentre alzi', 'allunga le braccia verso l\'alto'],
+  'Anca dx':       ['porta il bacino in linea', 'ruota leggermente l\'anca', 'allinea le anche'],
+  'Gomito dx':     ['distendi meglio il gomito', 'allunga il braccio', 'apri il gomito'],
+  'Schiena':       ['allunga la schiena', 'cresci verso l\'alto', 'tieni il busto lungo'],
+};
+
+const COACH_CONFIRM = [
+  'così, tieni',
+  'bene, resta lì',
+  'ottimo, mantieni',
+  'perfetto, respira',
+];
+
+function pickVariant(pool, lastIdx) {
+  if (!pool || pool.length === 0) return null;
+  if (pool.length === 1) return pool[0];
+  let i;
+  do { i = Math.floor(Math.random() * pool.length); } while (i === lastIdx);
+  coach.lastPhraseIdx = i;
+  return pool[i];
+}
+
+function worstJoint(risultati) {
+  let worst = null, maxRel = -1;
+  for (const r of risultati) {
+    if (r.ok) continue;
+    const delta = Math.abs(r.ang - r.target);
+    const rel = (delta - r.tol) / Math.max(r.tol, 1); // quanto oltre la tolleranza
+    if (rel > maxRel) { maxRel = rel; worst = r; }
+  }
+  return worst;
+}
+
+function coachComputeState(risultati, corpoVisible) {
+  if (!corpoVisible) return 'lost';
+  if (!risultati || risultati.length === 0) return 'lost';
+  const allOk = risultati.every(r => r.ok);
+  if (allOk) return 'holding';
+  const worst = worstJoint(risultati);
+  const delta = Math.abs(worst.ang - worst.target);
+  return delta > worst.tol * 1.5 ? 'adjusting' : 'close';
+}
+
+// Parlato gated: rispetta cooldown globale, aggiorna timestamps.
+function coachSpeak(text, { urgent = false } = {}) {
+  const now = Date.now() / 1000;
+  if (!urgent && now - coach.lastSpokenAt < COACH_GLOBAL_MIN) return false;
+  coach.lastSpokenAt = now;
+  speakAstrid(text, { interrompi: urgent });
+  return true;
+}
+
+// Chiamata ad ogni frame con body visibile o meno.
+function runCoach(risultati, corpoVisible, posa) {
+  const now = Date.now() / 1000;
+  const newState = coachComputeState(risultati, corpoVisible);
+  const stateChanged = newState !== coach.state;
+  const poseChanged = posa !== coach.posaWhenEntered;
+
+  if (stateChanged) {
+    coach.state = newState;
+    coach.stateSince = now;
+  }
+  if (poseChanged) {
+    coach.posaWhenEntered = posa;
+    coach.lastJoint = null;
+  }
+
+  const cooldown = COACH_COOLDOWN[newState] ?? 6;
+  const elapsedSinceSpoken = now - coach.lastSpokenAt;
+
+  // Al cambio di stato, parla se è passato il minimo globale
+  const shouldSpeakOnTransition = stateChanged && elapsedSinceSpoken >= COACH_GLOBAL_MIN;
+  const shouldSpeakByCooldown   = elapsedSinceSpoken >= cooldown;
+
+  if (!shouldSpeakOnTransition && !shouldSpeakByCooldown) return;
+
+  switch (newState) {
+    case 'lost': {
+      const phrases = [
+        'torna nel frame',
+        'ti ho perso, rientra nell\'inquadratura',
+        'fammi vedere tutto il corpo',
+      ];
+      coachSpeak(pickVariant(phrases, coach.lastPhraseIdx));
+      break;
+    }
+    case 'adjusting': {
+      const bad = worstJoint(risultati);
+      if (!bad) break;
+      // Se ho appena parlato di questo joint e non c'è cambio di stato, aspetta
+      if (bad.nome === coach.lastJoint && !stateChanged && elapsedSinceSpoken < cooldown + 2) break;
+      const text = getCoaching(posa, bad.nome, bad.ang, bad.target);
+      if (coachSpeak(text)) coach.lastJoint = bad.nome;
+      break;
+    }
+    case 'close': {
+      const bad = worstJoint(risultati);
+      if (!bad) break;
+      const fine = COACH_FINE[bad.nome];
+      const text = fine
+        ? pickVariant(fine, coach.lastPhraseIdx)
+        : getCoaching(posa, bad.nome, bad.ang, bad.target);
+      if (coachSpeak(text)) coach.lastJoint = bad.nome;
+      break;
+    }
+    case 'holding': {
+      // Silenzio di default. Conferma rara, solo se in holding da almeno 4s.
+      if (now - coach.stateSince < 4) break;
+      if (now - coach.lastConfirmAt < 12) break;
+      if (coachSpeak(pickVariant(COACH_CONFIRM, coach.lastPhraseIdx))) {
+        coach.lastConfirmAt = now;
+      }
+      break;
+    }
+  }
+}
+
+function resetCoach() {
+  coach.state = 'idle';
+  coach.stateSince = 0;
+  coach.lastJoint = null;
+  coach.lastPhraseIdx = -1;
+  coach.lastConfirmAt = 0;
+  coach.posaWhenEntered = null;
+}
 
 const SEQUENZA_GUIDATA = ['Tree Pose', 'Warrior I', 'Downward Dog'];
 const POSE_EMOJI = { 'Warrior I': '⚔️', 'Downward Dog': '🐕', 'Tree Pose': '🌳' };
@@ -843,12 +1027,12 @@ async function init() {
     poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
       baseOptions: {
         modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task',
-        delegate: 'GPU',
+        delegate: 'CPU',
       },
       runningMode: 'VIDEO',
       numPoses: 1,
-      minPoseDetectionConfidence: 0.6,
-      minTrackingConfidence: 0.6,
+      minPoseDetectionConfidence: 0.5,
+      minTrackingConfidence: 0.5,
     });
     document.getElementById('loading').classList.add('hidden');
     initVoice();
@@ -1012,14 +1196,10 @@ async function startCamera() {
     silCanvas.width  = webcam.videoWidth;
     silCanvas.height = webcam.videoHeight;
 
-    // Specchio via classe CSS — il transform è già gestito dal CSS zoom-out
-    if (currentFacing === 'user') {
-      webcam.classList.add('mirror');
-      canvas.style.transform = 'scaleX(-1)';
-    } else {
-      webcam.classList.remove('mirror');
-      canvas.style.transform = 'none';
-    }
+    // Mirror sempre attivo: esperienza "specchio" indipendentemente dalla camera.
+    // Video mirrorato via CSS, puntini mirrorati via coordinate (1 - lm.x) nel detectLoop.
+    webcam.classList.add('mirror');
+    canvas.style.transform = 'none';
 
     requestAnimationFrame(detectLoop);
   } catch(e) {
@@ -1079,9 +1259,10 @@ function buildJointRows(posa) {
 function getPoseConfig(posa) {
   const base = POSE_BASE[posa];
   const te = LIVELLI[state.livello].tolExtra;
+  // tolExtra rappresenta la tolleranza TOTALE per il livello (non additiva)
   return {
     ...base,
-    controlli: base.controlli.map(c => ({ ...c, tol: c.tol + te })),
+    controlli: base.controlli.map(c => ({ ...c, tol: te })),
   };
 }
 
@@ -1089,74 +1270,91 @@ function getPoseConfig(posa) {
 function detectLoop() {
   animFrameId = requestAnimationFrame(detectLoop);
   if (webcam.readyState < 2) return;
-  if (webcam.currentTime === lastVideoTime) return;
-  lastVideoTime = webcam.currentTime;
+
+  // Safety: assicurati che canvas abbia dimensioni
+  if (canvas.width !== webcam.videoWidth && webcam.videoWidth > 0) {
+    canvas.width  = webcam.videoWidth;
+    canvas.height = webcam.videoHeight;
+    silCanvas.width  = webcam.videoWidth;
+    silCanvas.height = webcam.videoHeight;
+  }
 
   const results = poseLandmarker.detectForVideo(webcam, performance.now());
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  silCtx.clearRect(0, 0, silCanvas.width, silCanvas.height);
 
+
+  if (!results.landmarks || results.landmarks.length === 0) return;
+  const lms = results.landmarks[0];
+
+  const w = canvas.width, h = canvas.height;
+  // Sempre mirror: l'utente si aspetta un'esperienza "a specchio" indipendentemente dalla camera.
+  const px = lm => (1 - lm.x) * w;
+  const py = lm => lm.y * h;
+  const dotR = Math.max(6, w / 110);
+
+  // Analisi angoli con tolleranza per livello (già applicata in getPoseConfig)
   const posa = state.posaCorrente;
   const cfg = getPoseConfig(posa);
   const now = Date.now() / 1000;
+  const risultati = [];
+  const jointOk = {}; // idx landmark → true/false per colore
+  let canAnalyze = true;
 
-  if (results.landmarks && results.landmarks.length > 0) {
-    const lms = results.landmarks[0];
+  for (const c of cfg.controlli) {
+    const pa = lms[IDX[c.punti[0]]], pb = lms[IDX[c.punti[1]]], pc = lms[IDX[c.punti[2]]];
+    if (!pa || !pb || !pc) { canAnalyze = false; break; }
+    const ang = calcolaAngolo([pa.x, pa.y], [pb.x, pb.y], [pc.x, pc.y]);
+    const ok = Math.abs(ang - c.target) <= c.tol;
+    risultati.push({ nome: c.nome, ang, target: c.target, tol: c.tol, ok });
+    jointOk[IDX[c.punti[1]]] = ok;
+    state.sessionStats.angoliTot++;
+    if (ok) state.sessionStats.angoliOk++;
+  }
 
-    // ── Controllo visibilità landmark chiave ──────────────────────────
-    const vis = (name) => (lms[IDX[name]]?.visibility ?? 0) > 0.4;
-    const hasHead  = vis('nose');
-    const hasShoulder = vis('left_shoulder') || vis('right_shoulder');
-    const hasHip   = vis('left_hip') || vis('right_hip');
-    const hasKnee  = vis('left_knee') || vis('right_knee');
-    const hasFeet  = vis('left_ankle') || vis('right_ankle');
-    const fullyVisible = hasHead && hasShoulder && hasHip && hasKnee && hasFeet;
+  // Disegna i dot di TUTTI i 33 landmark — niente filtro visibilità
+  for (let i = 0; i < lms.length; i++) {
+    const lm = lms[i];
+    const x = px(lm), y = py(lm);
+    let fill = '#e6ff00'; // default giallo/lime
+    if (i in jointOk) fill = jointOk[i] ? '#00e070' : '#ff2a2a';
+    ctx.beginPath();
+    ctx.arc(x, y, dotR + 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#000';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x, y, dotR, 0, Math.PI * 2);
+    ctx.fillStyle = fill;
+    ctx.fill();
+  }
 
-    if (!fullyVisible) {
-      // Testo descrittivo per UI (non per TTS)
-      const uiMsg = !hasFeet && !hasKnee ? 'Fai due passi indietro — devo vedere anche i piedi'
-                  : !hasFeet             ? 'Ancora un passo indietro — devo vedere le caviglie'
-                  : !hasHead             ? 'Fai un passo avanti — non vedo la testa'
-                  : 'Spostati al centro — devo vedere tutto il corpo';
-      if (state.corpoVisible || now - state.tPosiz > 8) {
-        showAstridBubble(uiMsg);
-        speakAstrid(ASTRID.sessione.corpoNonVisto());
-        state.tPosiz = now;
-      }
-      drawSilhouette(lms, false);
-      state.corpoVisible = false;
-      resetTimerUI();
-      return;
-    }
-
-    state.corpoVisible = true;
-    drawSkeleton(lms);
-    drawSilhouette(lms, true);
-
-    const risultati = [];
+  // Pannello target (HTML div) — aggiornato con stato live di ogni giunto
+  const panel = document.getElementById('target-panel');
+  if (panel) {
+    let html = `<div class="tp-title">${posa} · ${state.livello}</div>`;
     for (const c of cfg.controlli) {
-      const pa = getLmPoint(lms, c.punti[0]);
-      const pb = getLmPoint(lms, c.punti[1]);
-      const pc = getLmPoint(lms, c.punti[2]);
-      const ang = calcolaAngolo(pa, pb, pc);
-      const ok = Math.abs(ang - c.target) <= c.tol;
-      risultati.push({ nome: c.nome, ang, target: c.target, tol: c.tol, ok });
-      state.sessionStats.angoliTot++;
-      if (ok) state.sessionStats.angoliOk++;
+      const r = risultati.find(x => x.nome === c.nome);
+      const status = r ? (r.ok ? 'ok' : 'bad') : 'pending';
+      const val = r ? `${Math.round(r.ang)}° / ${c.target}°` : `— / ${c.target}°`;
+      html += `<div class="tp-row tp-${status}"><span class="tp-name">${c.nome}</span><span class="tp-val">${val}</span></div>`;
     }
+    html += `<div class="tp-tol">Tolleranza: ±${cfg.controlli[0].tol}°</div>`;
+    panel.innerHTML = html;
+  }
 
+  if (canAnalyze && risultati.length === cfg.controlli.length) {
+    state.corpoVisible = true;
     updateFeedbackUI(risultati);
     handleSessionLogic(risultati, now, posa);
-
+    runCoach(risultati, true, posa);
   } else {
-    // Nessun corpo rilevato
     if (state.corpoVisible || now - state.tPosiz > 8) {
-      showAstridBubble('Posizionati davanti alla camera!');
-      speakAstrid(ASTRID.sessione.corpoNonVisto());
+      showAstridBubble('Posizionati nel frame — devo vedere tutto il corpo');
       state.tPosiz = now;
     }
     state.corpoVisible = false;
-    drawSilhouettEmpty();
     resetTimerUI();
+    runCoach([], false, posa);
   }
 }
 
@@ -1165,20 +1363,57 @@ function getLmPoint(lms, nome) {
   return [lm.x * canvas.width, lm.y * canvas.height];
 }
 
-function drawSkeleton(lms) {
+function drawSkeleton(lms, risultati, controlli) {
   const w = canvas.width, h = canvas.height;
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = 'rgba(196,113,74,0.55)';
+  const dotR = Math.max(8, w / 80);
+  const lineW = Math.max(3, w / 160);
+
+  // Stato colore per giunto
+  const jointState = {};
+  if (risultati && controlli) {
+    for (let i = 0; i < controlli.length; i++) {
+      const r = risultati[i];
+      const stato = r.ok ? 'ok' : Math.abs(r.ang - r.target) < r.tol * 1.5 ? 'warn' : 'bad';
+      jointState[IDX[controlli[i].punti[1]]] = stato;
+    }
+  }
+  const DOT_COLOR = { ok: '#4ecb71', warn: '#f0a030', bad: '#e84040', neutral: '#ffffff' };
+
+  // Linee
   for (const [a, b] of CONNESSIONI) {
+    const la = lms[a], lb = lms[b];
+    if ((la.visibility ?? 0) < 0.15 || (lb.visibility ?? 0) < 0.15) continue;
+    const col = DOT_COLOR[jointState[a] ?? jointState[b] ?? 'neutral'];
     ctx.beginPath();
-    ctx.moveTo(lms[a].x * w, lms[a].y * h);
-    ctx.lineTo(lms[b].x * w, lms[b].y * h);
+    ctx.lineWidth = lineW + 3;
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+    ctx.lineCap = 'round';
+    ctx.moveTo(la.x * w, la.y * h);
+    ctx.lineTo(lb.x * w, lb.y * h);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.lineWidth = lineW;
+    ctx.strokeStyle = col;
+    ctx.moveTo(la.x * w, la.y * h);
+    ctx.lineTo(lb.x * w, lb.y * h);
     ctx.stroke();
   }
+
+  // Dot con bordo scuro per visibilità su qualsiasi sfondo
   for (let i = 0; i < 33; i++) {
+    const lm = lms[i];
+    if ((lm.visibility ?? 0) < 0.15) continue;
+    const x = lm.x * w, y = lm.y * h;
+    const col = DOT_COLOR[jointState[i] ?? 'neutral'];
+    // bordo scuro
     ctx.beginPath();
-    ctx.arc(lms[i].x * w, lms[i].y * h, 4, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(196,113,74,0.85)';
+    ctx.arc(x, y, dotR + 2, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fill();
+    // dot colorato
+    ctx.beginPath();
+    ctx.arc(x, y, dotR, 0, Math.PI * 2);
+    ctx.fillStyle = col;
     ctx.fill();
   }
 }
@@ -1265,6 +1500,50 @@ function drawSilhouettEmpty() {
   silCtx.setLineDash([]);
 }
 
+function drawDistanceHint(lms) {
+  const w = canvas.width, h = canvas.height;
+  const nose = lms[IDX['nose']];
+  const lank = lms[IDX['left_ankle']], rank = lms[IDX['right_ankle']];
+  const lhip = lms[IDX['left_hip']], rhip = lms[IDX['right_hip']];
+  const topY = nose ? nose.y * h : null;
+  let botY = null;
+  if ((lank?.visibility ?? 0) > 0.3 || (rank?.visibility ?? 0) > 0.3) {
+    botY = (((lank?.y ?? 0) + (rank?.y ?? 0)) / 2) * h;
+  } else if (lhip && rhip) {
+    botY = (((lhip.y + rhip.y) / 2) * h) + h * 0.25;
+  }
+  if (!topY || !botY) return;
+  const ratio = (botY - topY) / h;
+  const FAR = 0.50, OK_MIN = 0.55, OK_MAX = 0.78, NEAR = 0.80;
+  let msg = null, barColor, barFill;
+  if (ratio > NEAR) {
+    msg = 'Allontanati'; barColor = 'rgba(184,80,64,0.75)'; barFill = 1.0;
+  } else if (ratio < FAR) {
+    msg = 'Avvicinati'; barColor = 'rgba(192,128,64,0.65)'; barFill = ratio / OK_MIN;
+  } else {
+    barColor = ratio <= OK_MAX ? 'rgba(90,138,94,0.55)' : 'rgba(192,128,64,0.45)';
+    barFill = (ratio - FAR) / (NEAR - FAR);
+  }
+  const sc = Math.max(1, w / 480);
+  const bw = Math.round(10 * sc), barH = h * 0.35, barX = Math.round(12 * sc), barY = h * 0.32;
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  ctx.beginPath(); ctx.roundRect(barX, barY, bw, barH, bw / 2); ctx.fill();
+  const fillH = barH * Math.min(Math.max(barFill, 0.05), 1.0);
+  ctx.fillStyle = barColor;
+  ctx.beginPath(); ctx.roundRect(barX, barY + barH - fillH, bw, fillH, bw / 2); ctx.fill();
+  if (msg) {
+    const fSize = Math.round(w / 30);
+    ctx.font = `600 ${fSize}px 'Jost', sans-serif`;
+    ctx.textAlign = 'left';
+    const tw = ctx.measureText(msg).width + fSize;
+    const th = fSize * 1.8;
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.beginPath(); ctx.roundRect(barX + bw + 6 * sc, barY - 2, tw, th, th / 2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.fillText(msg, barX + bw + 6 * sc + fSize * 0.5, barY + fSize * 1.15);
+  }
+}
+
 function updateFeedbackUI(risultati) {
   // Pallini piccoli nel pannello bottom (rimangono per riferimento rapido)
   risultati.forEach((r, i) => {
@@ -1296,12 +1575,10 @@ function updateFeedbackUI(risultati) {
     tip.textContent = msg;
     tip.style.color = 'var(--text)';
     bf.className = 'visible bad';
-    bfIcon.textContent = '↕';
-    // Prima parte in evidenza: la parte del corpo
-    bfMain.textContent = bad.nome;
-    // Seconda parte: l'azione concreta (tutto dopo il primo "—")
+    bfIcon.textContent = bad.nome;  // badge con nome articolazione
     const parts = msg.split('—');
-    bfSub.textContent = parts.length > 1 ? parts.slice(1).join('—').trim() : msg;
+    bfMain.textContent = parts[0].trim();  // azione principale
+    bfSub.textContent = parts.length > 1 ? parts.slice(1).join('—').trim() : '';
     bfTimer.style.display = 'none';
   }
 }
@@ -1312,18 +1589,20 @@ function handleSessionLogic(risultati, now, posa) {
 
   if (allOk) {
     if (!state.timerInizio) {
-      // Parla solo all'inizio del timer — una volta sola
       state.timerInizio = now;
-      speakAstrid(ASTRID.sessione.posturaOk());
+      // Il coach gestisce la conferma vocale (stato holding)
     }
     const elapsed = now - state.timerInizio;
     const remaining = Math.max(0, DURATA - elapsed);
     updateTimerUI(remaining, DURATA);
 
-    // Parla solo a 10 secondi rimasti
+    // Milestone "10 secondi" — parla solo se il coach non ha appena parlato
     if (Math.round(remaining) === 10 && !state._said10) {
       state._said10 = true;
-      speakAstrid(ASTRID.sessione.dieciSecondi());
+      if (now - coach.lastSpokenAt >= COACH_GLOBAL_MIN) {
+        speakAstrid(ASTRID.sessione.dieciSecondi());
+        coach.lastSpokenAt = now;
+      }
     }
 
     if (remaining === 0 && !state.posaNota) {
@@ -1337,6 +1616,8 @@ function handleSessionLogic(risultati, now, posa) {
           const next = SEQUENZA_GUIDATA[state.seqIdx];
           state.posaCorrente = next;
           speakAstrid(ASTRID.sessione.posaCompletata(state.nome), { interrompi: true });
+          coach.lastSpokenAt = now;
+          resetCoach();
           setTimeout(() => {
             state.timerInizio = null;
             state.posaNota = false;
@@ -1347,31 +1628,19 @@ function handleSessionLogic(risultati, now, posa) {
           }, 2000);
         } else {
           speakAstrid(ASTRID.sessione.tuttoCompletato(state.nome), { interrompi: true });
+          coach.lastSpokenAt = now;
           setTimeout(() => endSession(), 3500);
         }
       } else {
         speakAstrid(ASTRID.sessione.posaCompletata(state.nome), { interrompi: true });
+        coach.lastSpokenAt = now;
         setTimeout(() => endSession(), 3000);
       }
     }
   } else {
-    // Postura persa mentre il timer era attivo — commento una volta sola
-    if (state.timerInizio !== null && !state._saidLost) {
-      state._saidLost = true;
-      const bad = risultati.find(r => !r.ok);
-      if (bad) speakCoaching(posa, bad.nome, bad.ang, bad.target);
-    }
-    // Coaching periodico: ogni 15 secondi, non di più
-    if (now - state.tCoach > 15) {
-      const bad = risultati.find(r => !r.ok);
-      if (bad) {
-        speakCoaching(posa, bad.nome, bad.ang, bad.target);
-        state.tCoach = now;
-      }
-    }
+    // Il coach gestisce tutto il feedback di correzione — niente più speakCoaching qui
     state.timerInizio = null;
     state._said10 = false;
-    state._saidLost = false;
     resetTimerUI();
   }
 }
