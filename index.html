@@ -943,9 +943,9 @@ const POSE_BASE = {
       'Alza entrambe le braccia verso il soffitto, diritte e parallele',
     ],
     controlli: [
-      { nome: 'Ginocchio dx',  punti: ['right_hip','right_knee','right_ankle'],      target: 90,  tol: 15 },
-      { nome: 'Ginocchio sin', punti: ['left_hip','left_knee','left_ankle'],          target: 170, tol: 15 },
-      { nome: 'Spalla dx',     punti: ['right_elbow','right_shoulder','right_hip'],   target: 170, tol: 20 },
+      { nome: 'Ginocchio dx',  punti: ['right_hip','right_knee','right_ankle'],      target: 90,  tol: 15, priority: 'core' },
+      { nome: 'Ginocchio sin', punti: ['left_hip','left_knee','left_ankle'],          target: 170, tol: 15, priority: 'extended' },
+      { nome: 'Spalla dx',     punti: ['right_elbow','right_shoulder','right_hip'],   target: 170, tol: 20, priority: 'core' },
     ],
   },
   'Downward Dog': {
@@ -956,9 +956,9 @@ const POSE_BASE = {
       'Tendi braccia e gambe il più possibile — talloni verso il pavimento',
     ],
     controlli: [
-      { nome: 'Anca dx',    punti: ['right_shoulder','right_hip','right_knee'],       target: 120, tol: 20 },
-      { nome: 'Gomito dx',  punti: ['right_shoulder','right_elbow','right_wrist'],    target: 170, tol: 15 },
-      { nome: 'Ginocchio dx', punti: ['right_hip','right_knee','right_ankle'],        target: 170, tol: 15 },
+      { nome: 'Anca dx',      punti: ['right_shoulder','right_hip','right_knee'],    target: 120, tol: 20, priority: 'core' },
+      { nome: 'Gomito dx',    punti: ['right_shoulder','right_elbow','right_wrist'], target: 170, tol: 15, priority: 'core' },
+      { nome: 'Ginocchio dx', punti: ['right_hip','right_knee','right_ankle'],        target: 170, tol: 15, priority: 'extended' },
     ],
   },
   'Tree Pose': {
@@ -969,9 +969,9 @@ const POSE_BASE = {
       'Apri il ginocchio sinistro verso l\'esterno e alza le braccia sopra la testa',
     ],
     controlli: [
-      { nome: 'Ginocchio sin', punti: ['left_hip','left_knee','left_ankle'],          target: 50,  tol: 20 },
-      { nome: 'Ginocchio dx',  punti: ['right_hip','right_knee','right_ankle'],       target: 170, tol: 15 },
-      { nome: 'Schiena',       punti: ['right_hip','right_shoulder','right_ear'],     target: 170, tol: 20 },
+      { nome: 'Ginocchio sin', punti: ['left_hip','left_knee','left_ankle'],          target: 50,  tol: 20, priority: 'extended' },
+      { nome: 'Ginocchio dx',  punti: ['right_hip','right_knee','right_ankle'],       target: 170, tol: 15, priority: 'extended' },
+      { nome: 'Schiena',       punti: ['right_hip','right_shoulder','right_ear'],     target: 170, tol: 20, priority: 'core' },
     ],
   },
 };
@@ -1301,12 +1301,32 @@ function detectLoop() {
   const jointOk = {}; // idx landmark → true/false per colore
   let canAnalyze = true;
 
+  // Calcola quanto un landmark è "fuori frame" (0 = dentro, >0 = bordo/fuori).
+  // Usato per allargare la tolleranza proporzionalmente all'incertezza.
+  function edgePenalty(lm) {
+    let p = 0;
+    // y > 0.9 → landmark vicino al bordo basso (gambe/piedi tagliati)
+    if (lm.y > 0.9)  p = Math.max(p, (lm.y - 0.9) * 150); // 0.9→0, 1.0→15, 1.1→30
+    if (lm.y < 0.1)  p = Math.max(p, (0.1 - lm.y) * 150);
+    if (lm.x > 0.9)  p = Math.max(p, (lm.x - 0.9) * 150);
+    if (lm.x < 0.1)  p = Math.max(p, (0.1 - lm.x) * 150);
+    return p;
+  }
+
   for (const c of cfg.controlli) {
     const pa = lms[IDX[c.punti[0]]], pb = lms[IDX[c.punti[1]]], pc = lms[IDX[c.punti[2]]];
-    if (!pa || !pb || !pc) { canAnalyze = false; break; }
+    if (!pa || !pb || !pc) {
+      // Landmark mancante: solo i core bloccano l'analisi
+      if (c.priority === 'core') { canAnalyze = false; break; }
+      continue; // extended mancante → skip, non blocca
+    }
+    // Tolleranza adattiva: tolleranza base del livello + penalità per landmark ai bordi
+    const penalty = Math.max(edgePenalty(pa), edgePenalty(pb), edgePenalty(pc));
+    const effectiveTol = c.tol + penalty;
+
     const ang = calcolaAngolo([pa.x, pa.y], [pb.x, pb.y], [pc.x, pc.y]);
-    const ok = Math.abs(ang - c.target) <= c.tol;
-    risultati.push({ nome: c.nome, ang, target: c.target, tol: c.tol, ok });
+    const ok = Math.abs(ang - c.target) <= effectiveTol;
+    risultati.push({ nome: c.nome, ang, target: c.target, tol: effectiveTol, ok, penalty });
     jointOk[IDX[c.punti[1]]] = ok;
     state.sessionStats.angoliTot++;
     if (ok) state.sessionStats.angoliOk++;
@@ -1336,13 +1356,15 @@ function detectLoop() {
       const r = risultati.find(x => x.nome === c.nome);
       const status = r ? (r.ok ? 'ok' : 'bad') : 'pending';
       const val = r ? `${Math.round(r.ang)}° / ${c.target}°` : `— / ${c.target}°`;
-      html += `<div class="tp-row tp-${status}"><span class="tp-name">${c.nome}</span><span class="tp-val">${val}</span></div>`;
+      const edge = r && r.penalty > 2 ? ' ~' : ''; // ~ indica inferenza bordo
+      html += `<div class="tp-row tp-${status}"><span class="tp-name">${c.nome}${edge}</span><span class="tp-val">${val}</span></div>`;
     }
-    html += `<div class="tp-tol">Tolleranza: ±${cfg.controlli[0].tol}°</div>`;
+    const baseTol = LIVELLI[state.livello].tolExtra;
+    html += `<div class="tp-tol">Tolleranza: ±${baseTol}°</div>`;
     panel.innerHTML = html;
   }
 
-  if (canAnalyze && risultati.length === cfg.controlli.length) {
+  if (canAnalyze && risultati.length > 0) {
     state.corpoVisible = true;
     updateFeedbackUI(risultati);
     handleSessionLogic(risultati, now, posa);
