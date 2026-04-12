@@ -771,11 +771,13 @@ const state = {
 const coach = {
   state: 'idle',        // idle | lost | entering | adjusting | close | holding
   stateSince: 0,
-  lastSpokenAt: 0,      // timestamp globale ultimo parlato (qualsiasi origine)
+  lastSpokenAt: Date.now() / 1000, // inizia "adesso" così non parla al primo frame
   lastJoint: null,
   lastPhraseIdx: -1,
   lastConfirmAt: 0,
   posaWhenEntered: null,
+  stableState: 'idle',  // stato stabile (ignora oscillazioni <2s)
+  stableStateSince: 0,
 };
 
 // Cooldown minimi per stato (secondi). stateSwitch = prima frase al cambio di stato.
@@ -786,7 +788,7 @@ const COACH_COOLDOWN = {
   holding:   10,
   entering:  0,
 };
-const COACH_GLOBAL_MIN = 3; // minimo assoluto tra due interventi vocali
+const COACH_GLOBAL_MIN = 6; // minimo assoluto tra due interventi vocali
 
 // Pool di frasi variate per correzioni gentili (usate in stato "close")
 const COACH_FINE = {
@@ -847,29 +849,37 @@ function coachSpeak(text, { urgent = false } = {}) {
 // Chiamata ad ogni frame con body visibile o meno.
 function runCoach(risultati, corpoVisible, posa) {
   const now = Date.now() / 1000;
-  const newState = coachComputeState(risultati, corpoVisible);
-  const stateChanged = newState !== coach.state;
-  const poseChanged = posa !== coach.posaWhenEntered;
+  const rawState = coachComputeState(risultati, corpoVisible);
 
-  if (stateChanged) {
-    coach.state = newState;
+  // Debounce: lo stato deve restare stabile per 1.5s prima di essere "ufficiale".
+  // Evita che oscillazioni frame-by-frame tra adjusting/close triggherino parlato continuo.
+  if (rawState !== coach.state) {
+    coach.state = rawState;
     coach.stateSince = now;
   }
-  if (poseChanged) {
+  // Lo stato stabile cambia solo se il rawState è rimasto lo stesso per 1.5s
+  if (rawState === coach.state && (now - coach.stateSince) >= 1.5) {
+    if (rawState !== coach.stableState) {
+      coach.stableState = rawState;
+      coach.stableStateSince = now;
+    }
+  }
+
+  if (posa !== coach.posaWhenEntered) {
     coach.posaWhenEntered = posa;
     coach.lastJoint = null;
   }
 
-  const cooldown = COACH_COOLDOWN[newState] ?? 6;
+  const activeState = coach.stableState;
+  if (activeState === 'idle') return; // non ancora stabilizzato
+
+  const cooldown = COACH_COOLDOWN[activeState] ?? 8;
   const elapsedSinceSpoken = now - coach.lastSpokenAt;
 
-  // Al cambio di stato, parla se è passato il minimo globale
-  const shouldSpeakOnTransition = stateChanged && elapsedSinceSpoken >= COACH_GLOBAL_MIN;
-  const shouldSpeakByCooldown   = elapsedSinceSpoken >= cooldown;
+  // Rispetta SEMPRE il cooldown dello stato corrente — nessuna eccezione per transizioni
+  if (elapsedSinceSpoken < cooldown) return;
 
-  if (!shouldSpeakOnTransition && !shouldSpeakByCooldown) return;
-
-  switch (newState) {
+  switch (activeState) {
     case 'lost': {
       const phrases = [
         'torna nel frame',
@@ -882,8 +892,6 @@ function runCoach(risultati, corpoVisible, posa) {
     case 'adjusting': {
       const bad = worstJoint(risultati);
       if (!bad) break;
-      // Se ho appena parlato di questo joint e non c'è cambio di stato, aspetta
-      if (bad.nome === coach.lastJoint && !stateChanged && elapsedSinceSpoken < cooldown + 2) break;
       const text = getCoaching(posa, bad.nome, bad.ang, bad.target);
       if (coachSpeak(text)) coach.lastJoint = bad.nome;
       break;
@@ -899,9 +907,9 @@ function runCoach(risultati, corpoVisible, posa) {
       break;
     }
     case 'holding': {
-      // Silenzio di default. Conferma rara, solo se in holding da almeno 4s.
-      if (now - coach.stateSince < 4) break;
-      if (now - coach.lastConfirmAt < 12) break;
+      // Silenzio di default. Conferma rara.
+      if (now - coach.stableStateSince < 5) break;
+      if (now - coach.lastConfirmAt < 15) break;
       if (coachSpeak(pickVariant(COACH_CONFIRM, coach.lastPhraseIdx))) {
         coach.lastConfirmAt = now;
       }
@@ -911,8 +919,12 @@ function runCoach(risultati, corpoVisible, posa) {
 }
 
 function resetCoach() {
+  const now = Date.now() / 1000;
   coach.state = 'idle';
-  coach.stateSince = 0;
+  coach.stateSince = now;
+  coach.stableState = 'idle';
+  coach.stableStateSince = now;
+  coach.lastSpokenAt = now; // silenzio iniziale dopo reset
   coach.lastJoint = null;
   coach.lastPhraseIdx = -1;
   coach.lastConfirmAt = 0;
@@ -2144,7 +2156,9 @@ function _stopAll() {
 function speakAstrid(testo, { interrompi = false } = {}) {
   if (!testo) return;
   const now = Date.now();
-  if (testo === _lastSpoken && now - _lastSpokenTime < 3000) return;
+  // Dedup: stesso testo entro 6s oppure qualsiasi testo entro 4s → ignora
+  if (testo === _lastSpoken && now - _lastSpokenTime < 6000) return;
+  if (now - _lastSpokenTime < 4000 && !interrompi) return;
   // Cancella sempre speechSynthesis — evita sovrapposizioni con Web Speech residue
   speechSynthesis.cancel();
   if (interrompi) _stopAll();
