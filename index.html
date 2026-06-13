@@ -1190,6 +1190,7 @@ let currentFacing = 'environment'; // posteriore di default — FOV più ampio
 const silCanvas = document.getElementById('silhouette-canvas');
 const silCtx = silCanvas.getContext('2d');
 const ZOOM_SCALE = 0.75; // zoom-out digitale
+const MIN_VIS = 0.6; // visibility minima per considerare un landmark affidabile
 
 async function startCamera() {
   try {
@@ -1331,13 +1332,19 @@ function detectLoop() {
       if (c.priority === 'core') { canAnalyze = false; break; }
       continue; // extended mancante → skip, non blocca
     }
-    // Tolleranza adattiva: tolleranza base del livello + penalità per landmark ai bordi
-    const penalty = Math.max(edgePenalty(pa), edgePenalty(pb), edgePenalty(pc));
-    const effectiveTol = c.tol + penalty;
+    // Affidabilità: se uno dei landmark non è visto con sicurezza il controllo non è valutabile.
+    // MediaPipe "inventa" posizioni quando non vede il corpo (es. utente seduto) → vanno scartate.
+    const visOk = (pa.visibility ?? 0) >= MIN_VIS && (pb.visibility ?? 0) >= MIN_VIS && (pc.visibility ?? 0) >= MIN_VIS;
+    if (!visOk) {
+      const includesLeg = c.punti.some(p => p.includes('knee') || p.includes('ankle'));
+      if (c.priority === 'core' || includesLeg) canAnalyze = false;
+      continue; // non valutabile: niente push, niente jointOk, niente conteggio
+    }
+    const effectiveTol = c.tol;
 
     const ang = calcolaAngolo([pa.x, pa.y], [pb.x, pb.y], [pc.x, pc.y]);
     const ok = Math.abs(ang - c.target) <= effectiveTol;
-    risultati.push({ nome: c.nome, ang, target: c.target, tol: effectiveTol, ok, penalty });
+    risultati.push({ nome: c.nome, ang, target: c.target, tol: effectiveTol, ok, penalty: 0 });
     jointOk[IDX[c.punti[1]]] = ok;
     state.sessionStats.angoliTot++;
     if (ok) state.sessionStats.angoliOk++;
@@ -1346,6 +1353,7 @@ function detectLoop() {
   // Disegna i dot di TUTTI i 33 landmark — niente filtro visibilità
   for (let i = 0; i < lms.length; i++) {
     const lm = lms[i];
+    if ((lm.visibility ?? 0) < MIN_VIS) continue; // non disegnare landmark inventati
     const x = px(lm), y = py(lm);
     let fill = '#e6ff00'; // default giallo/lime
     if (i in jointOk) fill = jointOk[i] ? '#00e070' : '#ff2a2a';
@@ -1382,7 +1390,7 @@ function detectLoop() {
     runCoach(risultati, true, posa);
   } else {
     if (state.corpoVisible || now - state.tPosiz > 8) {
-      showAstridBubble('Posizionati nel frame — devo vedere tutto il corpo');
+      showAstridBubble('Allontanati, devo vedere tutto il corpo, gambe comprese');
       state.tPosiz = now;
     }
     state.corpoVisible = false;
