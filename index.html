@@ -1191,6 +1191,13 @@ const silCanvas = document.getElementById('silhouette-canvas');
 const silCtx = silCanvas.getContext('2d');
 const ZOOM_SCALE = 0.75; // zoom-out digitale
 const MIN_VIS = 0.6; // visibility minima per considerare un landmark affidabile
+const FRAME_MARGIN = 0.02;
+function reliable(lm) {
+  if (!lm) return false;
+  if (typeof lm.visibility === 'number' && lm.visibility > 0 && lm.visibility < MIN_VIS) return false;
+  if (lm.x < FRAME_MARGIN || lm.x > 1 - FRAME_MARGIN || lm.y < FRAME_MARGIN || lm.y > 1 - FRAME_MARGIN) return false;
+  return true;
+}
 
 async function startCamera() {
   try {
@@ -1334,7 +1341,7 @@ function detectLoop() {
     }
     // Affidabilità: se uno dei landmark non è visto con sicurezza il controllo non è valutabile.
     // MediaPipe "inventa" posizioni quando non vede il corpo (es. utente seduto) → vanno scartate.
-    const visOk = (pa.visibility ?? 0) >= MIN_VIS && (pb.visibility ?? 0) >= MIN_VIS && (pc.visibility ?? 0) >= MIN_VIS;
+    const visOk = reliable(pa) && reliable(pb) && reliable(pc);
     if (!visOk) {
       const includesLeg = c.punti.some(p => p.includes('knee') || p.includes('ankle'));
       if (c.priority === 'core' || includesLeg) canAnalyze = false;
@@ -1353,7 +1360,7 @@ function detectLoop() {
   // Disegna i dot di TUTTI i 33 landmark — niente filtro visibilità
   for (let i = 0; i < lms.length; i++) {
     const lm = lms[i];
-    if ((lm.visibility ?? 0) < MIN_VIS) continue; // non disegnare landmark inventati
+    if (!reliable(lm)) continue; // non disegnare landmark inventati
     const x = px(lm), y = py(lm);
     let fill = '#e6ff00'; // default giallo/lime
     if (i in jointOk) fill = jointOk[i] ? '#00e070' : '#ff2a2a';
