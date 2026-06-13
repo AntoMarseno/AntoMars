@@ -165,18 +165,20 @@
     position: absolute;
     width: 100%; height: 100%;
     top: 0; left: 0;
-    object-fit: cover;
+    object-fit: contain;
   }
   #webcam.mirror {
     transform: scaleX(-1);
   }
   #pose-canvas {
     position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: contain;
   }
 
   /* Sagoma guida */
   #silhouette-canvas {
     position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: contain;
     pointer-events: none; z-index: 3;
   }
 
@@ -1194,8 +1196,9 @@ async function startCamera() {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: currentFacing,
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
+        width: { ideal: 1080 },
+        height: { ideal: 1440 },
+        aspectRatio: { ideal: 1.3333 },
       },
       audio: false,
     });
