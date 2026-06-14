@@ -1,0 +1,133 @@
+[
+  { "file": "audio/benvenuto_1.mp3", "text": "Ciao! Sono Astrid, la tua coach personale di yoga. Dimmi il tuo nome così possiamo iniziare insieme!" },
+  { "file": "audio/benvenuto_2.mp3", "text": "Ti do il benvenuto in Allinea! Sono Astrid, la tua coach di yoga. Come ti chiami?" },
+  { "file": "audio/benvenuto_3.mp3", "text": "Ciao e che bello averti qui! Sono Astrid. Hai voglia di allenarti? Prima dimmi come ti chiami!" },
+
+  { "file": "audio/saluto_1.mp3", "text": "Ciao! Sono felice di allenarti oggi." },
+  { "file": "audio/saluto_2.mp3", "text": "Che bello averti qui! Iniziamo?" },
+  { "file": "audio/saluto_3.mp3", "text": "Perfetto! Sono pronta a guidarti." },
+
+  { "file": "audio/veloce_1.mp3", "text": "Wow, che velocità nelle scelte! Mi piace questa energia!" },
+  { "file": "audio/veloce_2.mp3", "text": "Che decisione rapida! Vedo che sai già cosa vuoi." },
+  { "file": "audio/veloce_3.mp3", "text": "Non perdiamo tempo! Ottimo, andiamo!" },
+
+  { "file": "audio/livello_arrivo_1.mp3", "text": "Allora, sei alle prime armi o hai già esperienza? Scegli il tuo livello!" },
+  { "file": "audio/livello_arrivo_2.mp3", "text": "Quanto è allenato il tuo corpo? Scegli onestamente, è per il tuo bene!" },
+  { "file": "audio/livello_arrivo_3.mp3", "text": "Scegliamo il livello giusto per te. Puoi sempre cambiarlo!" },
+
+  { "file": "audio/livello_principiante_1.mp3", "text": "Ottima scelta! Tolleranze più ampie, puoi sbagliare un po' l'angolo. Perfetto per imparare!" },
+  { "file": "audio/livello_principiante_2.mp3", "text": "Principiante, scelta saggia! Meglio iniziare con calma e migliorare gradualmente." },
+
+  { "file": "audio/livello_intermedio_1.mp3", "text": "Intermedio! Le pose richiederanno più precisione ma ce la fai sicuramente." },
+  { "file": "audio/livello_intermedio_2.mp3", "text": "Livello Intermedio, la via di mezzo! Abbastanza sfidante da farti crescere." },
+
+  { "file": "audio/livello_master_1.mp3", "text": "Master! Che coraggio! Gli angoli devono essere quasi perfetti. Hai voglia di iniziare?" },
+  { "file": "audio/livello_master_2.mp3", "text": "Wow, direttamente Master! Rispetto. Preparati a sudare." },
+
+  { "file": "audio/modalita_arrivo_1.mp3", "text": "Come preferisci allenarti oggi? Posso guidarti io oppure scegli tu le pose." },
+  { "file": "audio/modalita_arrivo_2.mp3", "text": "Vuoi che ti accompagni in una sequenza completa, o preferisci scegliere tu?" },
+
+  { "file": "audio/modalita_guidata_1.mp3", "text": "Perfetto! Ti porto in tre pose: Tree Pose, Warrior I e Downward Dog. Venti secondi per ognuna. Seguimi!" },
+  { "file": "audio/modalita_guidata_2.mp3", "text": "Allenamento guidato! Ti guido io. Tre pose, venti secondi ciascuna. Iniziamo con Tree Pose!" },
+
+  { "file": "audio/modalita_libera_1.mp3", "text": "Sessione libera! Mi piace. Scegli la posa che preferisci." },
+  { "file": "audio/modalita_libera_2.mp3", "text": "Bene, scegli tu! Quale posa vuoi affrontare oggi?" },
+
+  { "file": "audio/pose_arrivo_1.mp3", "text": "Eccellente! Quale posa vuoi praticare oggi?" },
+  { "file": "audio/pose_arrivo_2.mp3", "text": "Scegli la tua posa. Ognuna ha i suoi benefici!" },
+
+  { "file": "audio/pose_warrior_1.mp3", "text": "Warrior I! Il Guerriero rafforza le gambe e apre il petto. Piega il ginocchio destro a novanta gradi e alza le braccia." },
+  { "file": "audio/pose_warrior_2.mp3", "text": "Ottima scelta! Il Guerriero richiede forza e equilibrio. Ginocchio destro a novanta, braccia in alto." },
+
+  { "file": "audio/pose_dog_1.mp3", "text": "Downward Dog, classico dello yoga! Mani e piedi a terra, fianchi verso il soffitto. Ottimo per schiena e polpacci." },
+  { "file": "audio/pose_dog_2.mp3", "text": "Il Cane a testa in giù! Forma una V con il corpo. Ottimo per allungare tutta la schiena." },
+
+  { "file": "audio/pose_tree_1.mp3", "text": "Tree Pose! L'albero. Equilibrio puro. Stai sulla gamba destra, piega la sinistra verso l'esterno. Concentrati!" },
+  { "file": "audio/pose_tree_2.mp3", "text": "La posa dell'albero migliora l'equilibrio. Tieni lo sguardo fisso su un punto davanti a te." },
+
+  { "file": "audio/prep_warrior.mp3", "text": "Preparati per il Guerriero! Fai un passo indietro con la sinistra, piega il ginocchio destro a novanta gradi e alza le braccia in alto. Dimmi quando sei in posizione!" },
+  { "file": "audio/prep_dog.mp3", "text": "Preparati per il Cane a testa in giù! Metti mani e piedi a terra e porta i fianchi verso il soffitto formando una V. Dimmi quando sei in posizione!" },
+  { "file": "audio/prep_tree.mp3", "text": "Preparati per la Tree Pose! Stai in piedi, poi appoggia il piede sinistro sulla coscia destra e apri il ginocchio verso l'esterno. Dimmi quando sei in posizione!" },
+
+  { "file": "audio/sessione_inizio_1.mp3", "text": "Posizionati bene davanti alla camera così posso vederti tutto!" },
+  { "file": "audio/sessione_inizio_2.mp3", "text": "Mettiti in posizione! Ho bisogno di vedere tutto il tuo corpo." },
+
+  { "file": "audio/sessione_corpo_non_visto_1.mp3", "text": "Non ti vedo bene! Fai un passo indietro per favore." },
+  { "file": "audio/sessione_corpo_non_visto_2.mp3", "text": "Allontanati un po' dalla camera, devo vedere tutto il tuo corpo." },
+
+  { "file": "audio/sessione_postura_ok_1.mp3", "text": "Perfetto! Tieni questa posizione per venti secondi!" },
+  { "file": "audio/sessione_postura_ok_2.mp3", "text": "Ottimo! Postura corretta. Venti secondi, mantieni la posizione!" },
+  { "file": "audio/sessione_postura_ok_3.mp3", "text": "Benissimo! Esattamente così. Venti secondi!" },
+
+  { "file": "audio/sessione_dieci_1.mp3", "text": "Dieci secondi ancora! Ce la fai, non mollare!" },
+  { "file": "audio/sessione_dieci_2.mp3", "text": "Quasi! Ancora dieci secondi. Tieni duro!" },
+  { "file": "audio/sessione_dieci_3.mp3", "text": "Metà strada superata! Ancora dieci secondi." },
+
+  { "file": "audio/sessione_posa_completata_1.mp3", "text": "Benissimo! Posa completata! Ottimo lavoro!" },
+  { "file": "audio/sessione_posa_completata_2.mp3", "text": "Fantastico! Ce l'hai fatta! Sei in forma!" },
+
+  { "file": "audio/sessione_tutto_completato_1.mp3", "text": "Hai completato tutto l'allenamento! Sono orgogliosa di te!" },
+  { "file": "audio/sessione_tutto_completato_2.mp3", "text": "Allenamento completato! Grandioso! Torna presto!" },
+
+  { "file": "audio/indietro_1.mp3", "text": "Nessun problema, torniamo indietro." },
+  { "file": "audio/indietro_2.mp3", "text": "Ok, ci si ripensa! Nessun problema." },
+  { "file": "audio/indietro_3.mp3", "text": "Certo, un passo indietro. Prenditi il tuo tempo." },
+
+  { "file": "audio/riepilogo_top_1.mp3", "text": "Fantastico! Posture quasi perfette! Hai fatto davvero bene!" },
+  { "file": "audio/riepilogo_top_2.mp3", "text": "Che sessione straordinaria! Continua così!" },
+
+  { "file": "audio/riepilogo_medio_1.mp3", "text": "Buon lavoro! Puoi ancora migliorare, ma sei sulla strada giusta!" },
+  { "file": "audio/riepilogo_medio_2.mp3", "text": "Con un po' di pratica in più diventerai imbattibile!" },
+
+  { "file": "audio/riepilogo_base_1.mp3", "text": "Non mollare! Lo yoga richiede pratica. Ogni sessione ti migliora!" },
+  { "file": "audio/riepilogo_base_2.mp3", "text": "Ogni inizio è difficile! Torna presto e vedrai i progressi!" },
+
+  { "file": "audio/coaching_warrior_ginocchiodx_low.mp3", "text": "Piega di più il ginocchio destro — spingi il peso sul tallone, come se volessi sederti su una sedia." },
+  { "file": "audio/coaching_warrior_ginocchiodx_high.mp3", "text": "Raddrizza il ginocchio destro — distendi la gamba, spingi il tallone nel pavimento." },
+  { "file": "audio/coaching_warrior_ginocchiosin_low.mp3", "text": "Tendi la gamba sinistra — spingi il tallone sinistro indietro verso il muro." },
+  { "file": "audio/coaching_warrior_ginocchiosin_high.mp3", "text": "Abbassa un po' la gamba sinistra, rilassa il ginocchio." },
+  { "file": "audio/coaching_warrior_spalla_low.mp3", "text": "Allunga le braccia verso il soffitto — spingi i palmi in alto, senti il lato del corpo che si allunga." },
+  { "file": "audio/coaching_warrior_spalla_high.mp3", "text": "Abbassa le spalle — allontanale dalle orecchie, scapole verso il basso." },
+
+  { "file": "audio/coaching_dog_anca_low.mp3", "text": "Spingi i fianchi verso il soffitto — immagina un filo che ti tira su dalla vita." },
+  { "file": "audio/coaching_dog_anca_high.mp3", "text": "Abbassa i fianchi — porta il peso verso i piedi, senti i polpacci che si allungano." },
+  { "file": "audio/coaching_dog_gomito_low.mp3", "text": "Tendi le braccia — spingi attivamente i palmi nel tappetino." },
+  { "file": "audio/coaching_dog_gomito_high.mp3", "text": "Piega leggermente i gomiti — ammorbidisci le braccia, non bloccare le articolazioni." },
+  { "file": "audio/coaching_dog_ginocchiodx_low.mp3", "text": "Raddrizza le ginocchia — spingi i talloni verso il pavimento." },
+  { "file": "audio/coaching_dog_ginocchiodx_high.mp3", "text": "Piega un po' le ginocchia — alleggerisci la tensione nei muscoli posteriori." },
+
+  { "file": "audio/coaching_tree_ginocchiosin_low.mp3", "text": "Apri il ginocchio sinistro verso l'esterno — come una porta che si apre lentamente." },
+  { "file": "audio/coaching_tree_ginocchiosin_high.mp3", "text": "Porta il piede sinistro più in alto sulla coscia, lontano dal ginocchio." },
+  { "file": "audio/coaching_tree_ginocchiodx_low.mp3", "text": "Tendi la gamba destra — spingi il piede nel pavimento, radica il tuo equilibrio." },
+  { "file": "audio/coaching_tree_ginocchiodx_high.mp3", "text": "Raddrizza la gamba destra — senti la solidità sotto il piede." },
+  { "file": "audio/coaching_tree_schiena_low.mp3", "text": "Allunga la corona della testa verso il soffitto — schiena dritta, mento leggermente dentro." },
+  { "file": "audio/coaching_tree_schiena_high.mp3", "text": "Abbassa le spalle — porta le scapole verso il basso e verso il centro." },
+
+  { "file": "audio/coach_fine_ginocchiodx_1.mp3", "text": "Piega un po' di più il ginocchio destro." },
+  { "file": "audio/coach_fine_ginocchiodx_2.mp3", "text": "Affonda leggermente di più." },
+  { "file": "audio/coach_fine_ginocchiodx_3.mp3", "text": "Scendi un pelo sul destro." },
+  { "file": "audio/coach_fine_ginocchiosin_1.mp3", "text": "Allunga meglio la gamba dietro." },
+  { "file": "audio/coach_fine_ginocchiosin_2.mp3", "text": "Distendi un po' di più il ginocchio sinistro." },
+  { "file": "audio/coach_fine_ginocchiosin_3.mp3", "text": "Tieni dietro la gamba tesa." },
+  { "file": "audio/coach_fine_spalla_1.mp3", "text": "Apri un po' di più le braccia." },
+  { "file": "audio/coach_fine_spalla_2.mp3", "text": "Rilassa le spalle mentre alzi." },
+  { "file": "audio/coach_fine_spalla_3.mp3", "text": "Allunga le braccia verso l'alto." },
+  { "file": "audio/coach_fine_anca_1.mp3", "text": "Porta il bacino in linea." },
+  { "file": "audio/coach_fine_anca_2.mp3", "text": "Ruota leggermente l'anca." },
+  { "file": "audio/coach_fine_anca_3.mp3", "text": "Allinea le anche." },
+  { "file": "audio/coach_fine_gomito_1.mp3", "text": "Distendi meglio il gomito." },
+  { "file": "audio/coach_fine_gomito_2.mp3", "text": "Allunga il braccio." },
+  { "file": "audio/coach_fine_gomito_3.mp3", "text": "Apri il gomito." },
+  { "file": "audio/coach_fine_schiena_1.mp3", "text": "Allunga la schiena." },
+  { "file": "audio/coach_fine_schiena_2.mp3", "text": "Cresci verso l'alto." },
+  { "file": "audio/coach_fine_schiena_3.mp3", "text": "Tieni il busto lungo." },
+
+  { "file": "audio/coach_confirm_1.mp3", "text": "Così, tieni." },
+  { "file": "audio/coach_confirm_2.mp3", "text": "Bene, resta lì." },
+  { "file": "audio/coach_confirm_3.mp3", "text": "Ottimo, mantieni." },
+  { "file": "audio/coach_confirm_4.mp3", "text": "Perfetto, respira." },
+
+  { "file": "audio/coach_lost_1.mp3", "text": "Torna nel frame." },
+  { "file": "audio/coach_lost_2.mp3", "text": "Ti ho perso, rientra nell'inquadratura." },
+  { "file": "audio/coach_lost_3.mp3", "text": "Fammi vedere tutto il corpo." }
+]
