@@ -434,7 +434,7 @@
       <div class="level-dot" style="background:#5A8A5E"></div>
       <div class="level-info">
         <div class="level-name">Principiante</div>
-        <div class="level-desc">Tolleranza ±20° · Ideale per iniziare</div>
+        <div class="level-desc">Tolleranza ampia · Ideale per iniziare</div>
       </div>
     </div>
 
@@ -442,7 +442,7 @@
       <div class="level-dot" style="background:#C4714A"></div>
       <div class="level-info">
         <div class="level-name">Intermedio</div>
-        <div class="level-desc">Tolleranza ±8° · Pratica regolare</div>
+        <div class="level-desc">Tolleranza media · Pratica regolare</div>
       </div>
       <span class="recommended-badge">Consigliato</span>
     </div>
@@ -451,7 +451,7 @@
       <div class="level-dot" style="background:#B85040"></div>
       <div class="level-info">
         <div class="level-name">Master</div>
-        <div class="level-desc">Tolleranza ±0° · Solo esperti</div>
+        <div class="level-desc">Tolleranza stretta · Solo esperti</div>
       </div>
     </div>
 
@@ -771,16 +771,20 @@ const state = {
 // Macchina a stati che decide se/quando/cosa far dire ad Astrid.
 // Obiettivo: silenzio come default, un solo consiglio alla volta, niente ripetizioni.
 const coach = {
-  state: 'idle',        // idle | lost | entering | adjusting | close | holding
-  stateSince: 0,
   lastSpokenAt: Date.now() / 1000, // inizia "adesso" così non parla al primo frame
-  lastJoint: null,
   lastPhraseIdx: -1,
-  lastConfirmAt: 0,
   posaWhenEntered: null,
-  stableState: 'idle',  // stato stabile (ignora oscillazioni <2s)
-  stableStateSince: 0,
+  targetJoint: null,       // controllo attualmente in correzione (una per volta)
+  jointLastSpoken: {},     // nome → timestamp ultima volta che ne ho parlato
+  jointLastErr: {},        // nome → errore quando ne ho parlato (per cambi significativi)
+  lostSince: 0,            // quando il corpo è andato perso (0 = visibile)
+  lastLostMsgAt: 0,        // ultimo invito a rientrare nel frame
 };
+
+const COACH_MIN_INTERVAL = 4;    // s minimi tra due correzioni (le conferme bypassano)
+const COACH_JOINT_COOLDOWN = 5;  // s prima di ritornare sullo stesso joint
+const COACH_LOST_GRACE = 2;      // s di grazia sulle perdite brevi
+const COACH_SIGNIFICANT = 12;    // gradi: cambio che permette di ritornare prima sul joint
 
 // Cooldown minimi per stato (secondi). stateSwitch = prima frase al cambio di stato.
 const COACH_COOLDOWN = {
@@ -794,12 +798,16 @@ const COACH_GLOBAL_MIN = 12; // minimo assoluto tra due interventi vocali
 
 // Pool di frasi variate per correzioni gentili (usate in stato "close")
 const COACH_FINE = {
-  'Ginocchio dx':  ["Piega un filo di più il destro.", "Affonda appena di più.", "Scendi un pelo sul destro."],
-  'Ginocchio sin': ["Allunga meglio la gamba dietro.", "Distendi un po' il sinistro.", "Tieni la gamba dietro tesa."],
-  'Spalla dx':     ["Apri un po' di più le braccia.", "Rilassa le spalle mentre alzi.", "Braccia più su."],
-  'Anca dx':       ["Porta il bacino in linea.", "Ruota appena l'anca.", "Allinea le anche."],
-  'Gomito dx':     ["Distendi meglio il gomito.", "Allunga il braccio.", "Apri il gomito."],
-  'Schiena':       ["Allunga la schiena.", "Cresci verso l'alto.", "Tieni il busto lungo."],
+  'Ginocchio dx':   ["Piega un filo di più il destro.", "Affonda appena di più.", "Scendi un pelo sul destro."],
+  'Ginocchio sin':  ["Allunga meglio la gamba dietro.", "Distendi un po' il sinistro.", "Tieni la gamba dietro tesa."],
+  'Braccio dx':     ["Apri un po' di più le braccia.", "Rilassa le spalle mentre alzi.", "Braccia più su."],
+  'Braccio sin':    ["Apri un po' di più le braccia.", "Rilassa le spalle mentre alzi.", "Braccia più su."],
+  'Anca':           ["Porta il bacino in linea.", "Ruota appena l'anca.", "Allinea le anche."],
+  'Gomito':         ["Distendi meglio il gomito.", "Allunga il braccio.", "Apri il gomito."],
+  'Ginocchio':      ["Piega un filo di più il destro.", "Affonda appena di più.", "Scendi un pelo sul destro."],
+  'Gamba appoggio': ["Piega un filo di più il destro.", "Affonda appena di più.", "Scendi un pelo sul destro."],
+  'Gamba alzata':   ["Allunga meglio la gamba dietro.", "Distendi un po' il sinistro.", "Tieni la gamba dietro tesa."],
+  'Schiena':        ["Allunga la schiena.", "Cresci verso l'alto.", "Tieni il busto lungo."],
 };
 
 const COACH_CONFIRM = [
@@ -848,98 +856,105 @@ function coachSpeak(text, { urgent = false } = {}) {
   return true;
 }
 
-// Chiamata ad ogni frame con body visibile o meno.
+// Chiamata ad ogni frame. Una correzione per volta, con conferma quando il controllo rientra.
 function runCoach(risultati, corpoVisible, posa) {
   const now = Date.now() / 1000;
-  const rawState = coachComputeState(risultati, corpoVisible);
-
-  // Debounce: lo stato deve restare stabile per 1.5s prima di essere "ufficiale".
-  // Evita che oscillazioni frame-by-frame tra adjusting/close triggherino parlato continuo.
-  if (rawState !== coach.state) {
-    coach.state = rawState;
-    coach.stateSince = now;
-  }
-  // Lo stato stabile cambia solo se il rawState è rimasto lo stesso per 1.5s
-  if (rawState === coach.state && (now - coach.stateSince) >= 1.5) {
-    if (rawState !== coach.stableState) {
-      coach.stableState = rawState;
-      coach.stableStateSince = now;
-    }
-  }
+  const say = (text) => { if (text) { speakAstrid(text, { interrompi: true }); coach.lastSpokenAt = now; } };
 
   if (posa !== coach.posaWhenEntered) {
     coach.posaWhenEntered = posa;
-    coach.lastJoint = null;
+    coach.targetJoint = null;
+    coach.jointLastSpoken = {};
+    coach.jointLastErr = {};
+    coach.lostSince = 0;
   }
 
-  const activeState = coach.stableState;
-  if (activeState === 'idle') return; // non ancora stabilizzato
-
-  const cooldown = COACH_COOLDOWN[activeState] ?? 8;
-  const elapsedSinceSpoken = now - coach.lastSpokenAt;
-
-  // Rispetta SEMPRE il cooldown dello stato corrente — nessuna eccezione per transizioni
-  if (elapsedSinceSpoken < cooldown) return;
-
-  switch (activeState) {
-    case 'lost': {
+  // Corpo/posa persi → grazia di 2s; oltre, invito a rientrare (non assillante)
+  if (!corpoVisible || !risultati || risultati.length === 0) {
+    if (!coach.lostSince) coach.lostSince = now;
+    coach.targetJoint = null;
+    if (now - coach.lostSince > COACH_LOST_GRACE && now - coach.lastLostMsgAt > 8 && now - coach.lastSpokenAt > COACH_MIN_INTERVAL) {
       const phrases = [
         "Torna nell'inquadratura.",
         "Ti ho perso, rientra nel frame.",
         "Fammi vedere tutto il corpo.",
       ];
-      coachSpeak(pickVariant(phrases, coach.lastPhraseIdx));
-      break;
+      say(pickVariant(phrases, coach.lastPhraseIdx));
+      coach.lastLostMsgAt = now;
     }
-    case 'adjusting': {
-      const bad = worstJoint(risultati);
-      if (!bad) break;
-      const text = getCoaching(posa, bad.nome, bad.ang, bad.target);
-      if (coachSpeak(text)) coach.lastJoint = bad.nome;
-      break;
+    return;
+  }
+  coach.lostSince = 0; // recuperato
+
+  // Tutto ok stabile → conferma se stavamo correggendo, poi silenzio.
+  // Il "tieni la posizione" lo gestisce handleSessionLogic.
+  if (risultati.every(r => r.ok)) {
+    if (coach.targetJoint) {
+      say(pickVariant(COACH_CONFIRM, coach.lastPhraseIdx)); // immediata
+      coach.jointLastSpoken[coach.targetJoint] = now;
+      coach.targetJoint = null;
     }
-    case 'close': {
-      const bad = worstJoint(risultati);
-      if (!bad) break;
-      const fine = COACH_FINE[bad.nome];
-      const text = fine
-        ? pickVariant(fine, coach.lastPhraseIdx)
-        : getCoaching(posa, bad.nome, bad.ang, bad.target);
-      if (coachSpeak(text)) coach.lastJoint = bad.nome;
-      break;
-    }
-    case 'holding': {
-      // Silenzio di default. Conferma rara.
-      if (now - coach.stableStateSince < 5) break;
-      if (now - coach.lastConfirmAt < 15) break;
-      if (coachSpeak(pickVariant(COACH_CONFIRM, coach.lastPhraseIdx))) {
-        coach.lastConfirmAt = now;
-      }
-      break;
+    return;
+  }
+
+  // Controllo prioritario: errore normalizzato maggiore tra i "da correggere" (debounced)
+  const worst = worstJoint(risultati);
+  if (!worst) return;
+
+  // Conferma e passaggio: il joint in lavorazione è rientrato ma altri no → conferma IMMEDIATA e avanza
+  if (coach.targetJoint && coach.targetJoint !== worst.nome) {
+    const prev = risultati.find(r => r.nome === coach.targetJoint);
+    if (!prev || prev.ok) {
+      say(pickVariant(COACH_CONFIRM, coach.lastPhraseIdx)); // ignora l'intervallo minimo
+      coach.jointLastSpoken[coach.targetJoint] = now;
+      coach.targetJoint = null;
+      return; // il prossimo arriva dopo l'intervallo
     }
   }
+
+  // Intervallo minimo globale tra correzioni
+  if (now - coach.lastSpokenAt < COACH_MIN_INTERVAL) return;
+
+  // Memoria per articolazione: non tornarci entro 5s se non è cambiata in modo significativo
+  const lastJ = coach.jointLastSpoken[worst.nome] || 0;
+  const lastErr = coach.jointLastErr[worst.nome];
+  const cambioSignificativo = (lastErr === undefined) || Math.abs(worst.err - lastErr) > COACH_SIGNIFICANT;
+  if (now - lastJ < COACH_JOINT_COOLDOWN && !cambioSignificativo) return;
+
+  // Magnitudine: scarto grande → coaching esplicito; scarto piccolo → variante breve
+  const grande = worst.err > worst.tol * 1.5;
+  let text;
+  if (grande) {
+    text = getCoaching(posa, worst.nome, worst.ang, worst.target);
+  } else {
+    const fine = COACH_FINE[worst.nome];
+    text = fine ? pickVariant(fine, coach.lastPhraseIdx) : getCoaching(posa, worst.nome, worst.ang, worst.target);
+  }
+  say(text);
+  coach.targetJoint = worst.nome;
+  coach.jointLastSpoken[worst.nome] = now;
+  coach.jointLastErr[worst.nome] = worst.err;
 }
 
 function resetCoach() {
   const now = Date.now() / 1000;
-  coach.state = 'idle';
-  coach.stateSince = now;
-  coach.stableState = 'idle';
-  coach.stableStateSince = now;
   coach.lastSpokenAt = now; // silenzio iniziale dopo reset
-  coach.lastJoint = null;
   coach.lastPhraseIdx = -1;
-  coach.lastConfirmAt = 0;
   coach.posaWhenEntered = null;
+  coach.targetJoint = null;
+  coach.jointLastSpoken = {};
+  coach.jointLastErr = {};
+  coach.lostSince = 0;
+  coach.lastLostMsgAt = 0;
 }
 
 const SEQUENZA_GUIDATA = ['Tree Pose', 'Warrior I', 'Downward Dog'];
 const POSE_EMOJI = { 'Warrior I': '⚔️', 'Downward Dog': '🐕', 'Tree Pose': '🌳' };
 
 const LIVELLI = {
-  'Principiante': { tolExtra: 20 },
-  'Intermedio':   { tolExtra: 8  },
-  'Master':       { tolExtra: 0  },
+  'Principiante': { margine: 12 },
+  'Intermedio':   { margine: 5  },
+  'Master':       { margine: 0  },
 };
 
 const POSE_VIDEOS = {
@@ -957,9 +972,10 @@ const POSE_BASE = {
       'Alza entrambe le braccia verso il soffitto, diritte e parallele',
     ],
     controlli: [
-      { nome: 'Ginocchio dx',  punti: ['right_hip','right_knee','right_ankle'],      target: 90,  tol: 15, priority: 'core' },
-      { nome: 'Ginocchio sin', punti: ['left_hip','left_knee','left_ankle'],          target: 170, tol: 15, priority: 'extended' },
-      { nome: 'Spalla dx',     punti: ['right_elbow','right_shoulder','right_hip'],   target: 170, tol: 20, priority: 'core' },
+      { nome: 'Ginocchio dx',  punti: ['right_hip','right_knee','right_ankle'],     target: 95,  tol: 15, priority: 'core' },
+      { nome: 'Ginocchio sin', punti: ['left_hip','left_knee','left_ankle'],        target: 175, tol: 15, priority: 'core' },
+      { nome: 'Braccio dx',    punti: ['right_elbow','right_shoulder','right_hip'],  target: 170, tol: 20, priority: 'core' },
+      { nome: 'Braccio sin',   punti: ['left_elbow','left_shoulder','left_hip'],     target: 170, tol: 20, priority: 'core' },
     ],
   },
   'Downward Dog': {
@@ -970,9 +986,9 @@ const POSE_BASE = {
       'Tendi braccia e gambe il più possibile — talloni verso il pavimento',
     ],
     controlli: [
-      { nome: 'Anca dx',      punti: ['right_shoulder','right_hip','right_knee'],    target: 120, tol: 20, priority: 'core' },
-      { nome: 'Gomito dx',    punti: ['right_shoulder','right_elbow','right_wrist'], target: 170, tol: 15, priority: 'core' },
-      { nome: 'Ginocchio dx', punti: ['right_hip','right_knee','right_ankle'],        target: 170, tol: 15, priority: 'extended' },
+      { nome: 'Anca',      punti: ['right_shoulder','right_hip','right_knee'],    target: 90,  tol: 20, priority: 'core' },
+      { nome: 'Gomito',    punti: ['right_shoulder','right_elbow','right_wrist'], target: 175, tol: 15, priority: 'core' },
+      { nome: 'Ginocchio', punti: ['right_hip','right_knee','right_ankle'],       target: 175, tol: 15, priority: 'core' },
     ],
   },
   'Tree Pose': {
@@ -983,9 +999,11 @@ const POSE_BASE = {
       'Apri il ginocchio sinistro verso l\'esterno e alza le braccia sopra la testa',
     ],
     controlli: [
-      { nome: 'Ginocchio sin', punti: ['left_hip','left_knee','left_ankle'],          target: 50,  tol: 20, priority: 'extended' },
-      { nome: 'Ginocchio dx',  punti: ['right_hip','right_knee','right_ankle'],       target: 170, tol: 15, priority: 'extended' },
-      { nome: 'Schiena',       punti: ['right_hip','right_shoulder','right_ear'],     target: 170, tol: 20, priority: 'core' },
+      { nome: 'Gamba appoggio', punti: ['right_hip','right_knee','right_ankle'],     target: 175, tol: 15, priority: 'core' },
+      { nome: 'Gamba alzata',   punti: ['left_hip','left_knee','left_ankle'],        target: 50,  tol: 20, priority: 'core' },
+      { nome: 'Schiena',        punti: ['right_hip','right_shoulder','right_ear'],    target: 175, tol: 20, priority: 'core' },
+      { nome: 'Braccio dx',     punti: ['right_elbow','right_shoulder','right_hip'],  target: 170, tol: 20, priority: 'core' },
+      { nome: 'Braccio sin',    punti: ['left_elbow','left_shoulder','left_hip'],     target: 170, tol: 20, priority: 'core' },
     ],
   },
 };
@@ -994,17 +1012,20 @@ const COACHING = {
   'Warrior I': {
     'Ginocchio dx':  { low: "Piega di più il ginocchio destro, scendi come per sederti.", high: "Raddrizza il ginocchio destro, spingi il tallone a terra." },
     'Ginocchio sin': { low: "Tendi la gamba sinistra, spingi il tallone indietro.", high: "Abbassa un po' la gamba sinistra, rilassa il ginocchio." },
-    'Spalla dx':     { low: "Allunga le braccia verso l'alto, palmi al soffitto.", high: "Abbassa le spalle, allontanale dalle orecchie." },
+    'Braccio dx':    { low: "Allunga le braccia verso l'alto, palmi al soffitto.", high: "Abbassa le spalle, allontanale dalle orecchie." },
+    'Braccio sin':   { low: "Allunga le braccia verso l'alto, palmi al soffitto.", high: "Abbassa le spalle, allontanale dalle orecchie." },
   },
   'Downward Dog': {
-    'Anca dx':       { low: "Spingi i fianchi verso il soffitto, allunga la schiena.", high: "Abbassa i fianchi, porta il peso sui piedi." },
-    'Gomito dx':     { low: "Tendi le braccia, spingi i palmi nel tappetino.", high: "Ammorbidisci i gomiti, non bloccarli." },
-    'Ginocchio dx':  { low: "Raddrizza le ginocchia, talloni verso il pavimento.", high: "Piega un po' le ginocchia, allenta la tensione." },
+    'Anca':       { low: "Spingi i fianchi verso il soffitto, allunga la schiena.", high: "Abbassa i fianchi, porta il peso sui piedi." },
+    'Gomito':     { low: "Tendi le braccia, spingi i palmi nel tappetino.", high: "Ammorbidisci i gomiti, non bloccarli." },
+    'Ginocchio':  { low: "Raddrizza le ginocchia, talloni verso il pavimento.", high: "Piega un po' le ginocchia, allenta la tensione." },
   },
   'Tree Pose': {
-    'Ginocchio sin': { low: "Apri il ginocchio sinistro verso l'esterno.", high: "Porta il piede più in alto sulla coscia." },
-    'Ginocchio dx':  { low: "Tendi la gamba destra, radica il piede a terra.", high: "Raddrizza la gamba destra, senti la stabilità." },
+    'Gamba alzata':  { low: "Apri il ginocchio sinistro verso l'esterno.", high: "Porta il piede più in alto sulla coscia." },
+    'Gamba appoggio':{ low: "Tendi la gamba destra, radica il piede a terra.", high: "Raddrizza la gamba destra, senti la stabilità." },
     'Schiena':       { low: "Allunga la testa verso l'alto, schiena dritta.", high: "Abbassa le spalle, scapole verso il centro." },
+    'Braccio dx':    { low: "Allunga le braccia verso l'alto, palmi al soffitto.", high: "Abbassa le spalle, allontanale dalle orecchie." },
+    'Braccio sin':   { low: "Allunga le braccia verso l'alto, palmi al soffitto.", high: "Abbassa le spalle, allontanale dalle orecchie." },
   },
 };
 
@@ -1251,6 +1272,12 @@ function initSessionState() {
   state._saidLost = false;
   state.sessionStats = { poseCompletate: [], angoliOk: 0, angoliTot: 0, tInizio: Date.now() };
 
+  // Reset stato rilevamento: smoothing, isteresi/debounce, fantasma, coach
+  smoothedLms = null;
+  for (const k in ctrlState) delete ctrlState[k];
+  ghostAlpha = 0; lastGhostGeom = null;
+  resetCoach();
+
   const posa = state.posaCorrente;
   document.getElementById('session-pose-name').textContent = posa;
   buildJointRows(posa);
@@ -1269,12 +1296,104 @@ function buildJointRows(posa) {
 
 function getPoseConfig(posa) {
   const base = POSE_BASE[posa];
-  const te = LIVELLI[state.livello].tolExtra;
-  // tolExtra rappresenta la tolleranza TOTALE per il livello (non additiva)
+  const margine = LIVELLI[state.livello].margine;
+  // Tolleranza effettiva = tol base del controllo + margine del livello (additivo)
   return {
     ...base,
-    controlli: base.controlli.map(c => ({ ...c, tol: te })),
+    controlli: base.controlli.map(c => ({ ...c, tol: c.tol + margine })),
   };
+}
+
+// ── Smoothing, debounce & fantasma — stato persistente tra i frame ─────
+// EMA sui landmark per stabilità (usata sia per gli angoli sia per il disegno).
+let smoothedLms = null;
+const SMOOTH_ALPHA = 0.5;
+function smoothLandmarks(raw) {
+  if (!smoothedLms || smoothedLms.length !== raw.length) {
+    smoothedLms = raw.map(p => ({ x: p.x, y: p.y, z: p.z, visibility: p.visibility }));
+    return smoothedLms;
+  }
+  for (let i = 0; i < raw.length; i++) {
+    const s = smoothedLms[i], p = raw[i];
+    s.x = SMOOTH_ALPHA * p.x + (1 - SMOOTH_ALPHA) * s.x;
+    s.y = SMOOTH_ALPHA * p.y + (1 - SMOOTH_ALPHA) * s.y;
+    s.z = p.z; s.visibility = p.visibility;
+  }
+  return smoothedLms;
+}
+
+// Stato per controllo con isteresi + debounce.
+// Diventa "da correggere" quando l'errore supera tol+5; torna "ok" solo sotto tol-3
+// (banda anti flip-flop). Il cambio è confermato solo dopo 4 frame consecutivi.
+const ctrlState = {};
+const HYST_IN = 5;
+const HYST_OUT = 3;
+const DEBOUNCE_FRAMES = 4;
+function evalNeedsFix(nome, err, tol) {
+  let s = ctrlState[nome];
+  if (!s) { ctrlState[nome] = { needsFix: err > tol, cand: null, count: 0 }; return ctrlState[nome].needsFix; }
+  let want = s.needsFix;
+  if (!s.needsFix && err > tol + HYST_IN) want = true;
+  else if (s.needsFix && err < tol - HYST_OUT) want = false;
+  if (want === s.needsFix) { s.cand = null; s.count = 0; return s.needsFix; }
+  if (s.cand === want) s.count++; else { s.cand = want; s.count = 1; }
+  if (s.count >= DEBOUNCE_FRAMES) { s.needsFix = want; s.cand = null; s.count = 0; }
+  return s.needsFix;
+}
+
+// Fantasma dell'arto da correggere (un solo controllo per volta).
+let ghostAlpha = 0;
+let lastGhostGeom = null;
+const GHOST_ALPHA_MAX = 0.7;
+
+// C' = dove deve stare C per ottenere l'angolo target nel vertice B.
+// Ruota C attorno a B mantenendo |BC|, scegliendo la soluzione più vicina alla C attuale.
+function ghostPoint(A, B, C, targetDeg) {
+  const baAng = Math.atan2(A[1] - B[1], A[0] - B[0]);
+  const lenBC = Math.hypot(C[0] - B[0], C[1] - B[1]);
+  const t = targetDeg * Math.PI / 180;
+  const cand = [t, -t].map(s => {
+    const a = baAng + s;
+    return [B[0] + lenBC * Math.cos(a), B[1] + lenBC * Math.sin(a)];
+  });
+  const d0 = Math.hypot(cand[0][0] - C[0], cand[0][1] - C[1]);
+  const d1 = Math.hypot(cand[1][0] - C[0], cand[1][1] - C[1]);
+  return d0 <= d1 ? cand[0] : cand[1];
+}
+
+// Fantasma NETTO e animato: tratto spesso, opacità alta, leggero pulsare, niente sfocatura.
+function drawGhost(g, alpha, w) {
+  const { A, B, C, Cp } = g;
+  const pulse = 0.85 + 0.15 * Math.sin(performance.now() / 320); // pulsare ciclico lieve
+  const a = alpha * pulse;
+  const col = (k) => `rgba(80,215,165,${k})`; // verde-acqua acceso ma calmo
+  ctx.save();
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.shadowBlur = 0;
+  // Riferimento A-B (più tenue)
+  ctx.strokeStyle = col(a * 0.5);
+  ctx.lineWidth = Math.max(8, w / 55);
+  ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.stroke();
+  // Segmento bersaglio B-C' (netto e spesso)
+  ctx.strokeStyle = col(a);
+  ctx.lineWidth = Math.max(12, w / 38);
+  ctx.beginPath(); ctx.moveTo(B[0], B[1]); ctx.lineTo(Cp[0], Cp[1]); ctx.stroke();
+  ctx.fillStyle = col(a);
+  ctx.beginPath(); ctx.arc(Cp[0], Cp[1], Math.max(8, w / 48), 0, Math.PI * 2); ctx.fill();
+  // Freccia da C verso C'
+  const dx = Cp[0] - C[0], dy = Cp[1] - C[1], len = Math.hypot(dx, dy);
+  if (len > w * 0.04) {
+    const ux = dx / len, uy = dy / len, head = Math.max(12, w / 36);
+    const hx = Cp[0] - ux * head, hy = Cp[1] - uy * head, nx = -uy, ny = ux;
+    ctx.strokeStyle = col(a);
+    ctx.lineWidth = Math.max(6, w / 80);
+    ctx.beginPath();
+    ctx.moveTo(hx + nx * head * 0.5, hy + ny * head * 0.5);
+    ctx.lineTo(Cp[0], Cp[1]);
+    ctx.lineTo(hx - nx * head * 0.5, hy - ny * head * 0.5);
+    ctx.stroke();
+  }
+  ctx.restore();
 }
 
 // ── Detection loop ─────────────────────────────────────────────────────
@@ -1296,7 +1415,7 @@ function detectLoop() {
 
 
   if (!results.landmarks || results.landmarks.length === 0) return;
-  const lms = results.landmarks[0];
+  const lms = smoothLandmarks(results.landmarks[0]); // EMA: coordinate stabilizzate
 
   const w = canvas.width, h = canvas.height;
   // Sempre mirror: l'utente si aspetta un'esperienza "a specchio" indipendentemente dalla camera.
@@ -1342,29 +1461,42 @@ function detectLoop() {
     const effectiveTol = c.tol;
 
     const ang = calcolaAngolo([pa.x, pa.y], [pb.x, pb.y], [pc.x, pc.y]);
-    const ok = Math.abs(ang - c.target) <= effectiveTol;
-    risultati.push({ nome: c.nome, ang, target: c.target, tol: effectiveTol, ok, penalty: 0 });
+    const err = Math.abs(ang - c.target);
+    const okRaw = err <= effectiveTol;
+    const ok = !evalNeedsFix(c.nome, err, effectiveTol); // isteresi + debounce
+    risultati.push({ nome: c.nome, ang, target: c.target, tol: effectiveTol, err, ok, punti: c.punti, penalty: 0 });
     jointOk[IDX[c.punti[1]]] = ok;
     state.sessionStats.angoliTot++;
-    if (ok) state.sessionStats.angoliOk++;
+    if (okRaw) state.sessionStats.angoliOk++; // scoring sul frame grezzo
   }
 
-  // Disegna i dot di TUTTI i 33 landmark — niente filtro visibilità
+  // Fantasma del solo controllo prioritario (peggior errore normalizzato, debounced, fuori tolleranza)
+  const ghostWorst = (canAnalyze && risultati.length > 0) ? worstJoint(risultati) : null;
+  let ghostTargetAlpha = 0;
+  if (ghostWorst && ghostWorst.punti) {
+    const ga = lms[IDX[ghostWorst.punti[0]]], gb = lms[IDX[ghostWorst.punti[1]]], gc = lms[IDX[ghostWorst.punti[2]]];
+    if (ga && gb && gc) {
+      const A = [px(ga), py(ga)], B = [px(gb), py(gb)], C = [px(gc), py(gc)];
+      lastGhostGeom = { A, B, C, Cp: ghostPoint(A, B, C, ghostWorst.target) };
+      ghostTargetAlpha = GHOST_ALPHA_MAX;
+    }
+  }
+  ghostAlpha += (ghostTargetAlpha - ghostAlpha) * 0.18; // dissolvenza morbida in entrata/uscita
+  if (ghostAlpha > 0.01 && lastGhostGeom) drawGhost(lastGhostGeom, ghostAlpha, w);
+
+  // Puntini discreti: confermano che il tracking funziona, senza competere col fantasma
+  ctx.save();
+  ctx.globalAlpha = 0.25;
+  ctx.fillStyle = '#ffffff';
+  const tinyR = Math.max(2, w / 220);
   for (let i = 0; i < lms.length; i++) {
     const lm = lms[i];
     if (!reliable(lm)) continue; // non disegnare landmark inventati
-    const x = px(lm), y = py(lm);
-    let fill = '#e6ff00'; // default giallo/lime
-    if (i in jointOk) fill = jointOk[i] ? '#00e070' : '#ff2a2a';
     ctx.beginPath();
-    ctx.arc(x, y, dotR + 4, 0, Math.PI * 2);
-    ctx.fillStyle = '#000';
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(x, y, dotR, 0, Math.PI * 2);
-    ctx.fillStyle = fill;
+    ctx.arc(px(lm), py(lm), tinyR, 0, Math.PI * 2);
     ctx.fill();
   }
+  ctx.restore();
 
   // Pannello target (HTML div) — aggiornato con stato live di ogni giunto
   const panel = document.getElementById('target-panel');
@@ -1377,8 +1509,8 @@ function detectLoop() {
       const edge = r && r.penalty > 2 ? ' ~' : ''; // ~ indica inferenza bordo
       html += `<div class="tp-row tp-${status}"><span class="tp-name">${c.nome}${edge}</span><span class="tp-val">${val}</span></div>`;
     }
-    const baseTol = LIVELLI[state.livello].tolExtra;
-    html += `<div class="tp-tol">Tolleranza: ±${baseTol}°</div>`;
+    const margine = LIVELLI[state.livello].margine;
+    html += `<div class="tp-tol">Margine livello: +${margine}°</div>`;
     panel.innerHTML = html;
   }
 
@@ -1662,6 +1794,9 @@ function handleSessionLogic(risultati, now, posa) {
             state.timerInizio = null;
             state.posaNota = false;
             state._said10 = false;
+            // Reset rilevamento per la nuova posa
+            for (const k in ctrlState) delete ctrlState[k];
+            ghostAlpha = 0; lastGhostGeom = null;
             document.getElementById('session-pose-name').textContent = next;
             buildJointRows(next);
             showPrepScreenInSession(next);
